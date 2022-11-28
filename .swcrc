@@ -1,0 +1,16 @@
+{
+  "$schema": "https://json.schemastore.org/swcrc",
+  "jsc": {
+    "target": "es2020"
+  },
+  "module": {
+    "type": "commonjs"
+  },
+  "env": {
+    "targets": {
+      "node": "14"
+    },
+    "mode": "entry",
+    "coreJs": "3.22"
+  }
+}

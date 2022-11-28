@@ -1,0 +1,24 @@
+{
+  "name": "@fullscript/eslint-plugin",
+  "version": "1.0.0",
+  "description": "Fullscript custom eslint rules",
+  "main": "dist/index.js",
+  "author": "Ryan O'Connor <ryan.oconnor@fullscript.com>",
+  "license": "MIT",
+  "private": false,
+  "scripts": {
+    "prettier-format": "prettier --loglevel 'warn' --write './src/**/*.js'",
+    "prettier-diff": "prettier --loglevel 'warn' --check './src/**/*.js'",
+    "build": "swc ./src -d dist",
+    "build-watch": "swc ./src -d dist -w",
+    "prepare": "husky install"
+  },
+  "devDependencies": {
+    "@swc/cli": "^0.1.57",
+    "@swc/core": "^1.3.20",
+    "chokidar": "^3.5.3",
+    "core-js": "^3.26.1",
+    "prettier": "^2.8.0",
+    "husky": "^8.0.0"
+  }
+}
