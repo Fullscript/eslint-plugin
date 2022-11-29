@@ -8,7 +8,10 @@ Object.defineProperty(exports, "rules", {
 });
 const _oneTranslationImport = require("./oneTranslationImport");
 const _noRenamedTranslationImport = require("./noRenamedTranslationImport");
+const _gqlRules = require("./gqlRules");
 const rules = {
     "one-translation-import-per-file": _oneTranslationImport.oneTranslationImport,
-    "no-renamed-translation-import": _noRenamedTranslationImport.noRenamedTranslationImport
+    "no-renamed-translation-import": _noRenamedTranslationImport.noRenamedTranslationImport,
+    "gql-objects": _gqlRules.gqlObjects,
+    "gql-operation-name": _gqlRules.gqlOperationName
 };
