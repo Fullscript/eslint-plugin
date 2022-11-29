@@ -1,6 +1,6 @@
 {
   "name": "@fullscript/eslint-plugin",
-  "version": "1.0.0",
+  "version": "1.1.0",
   "description": "Fullscript custom eslint rules",
   "main": "dist/index.js",
   "author": "Ryan O'Connor <ryan.oconnor@fullscript.com>",
