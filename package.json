@@ -15,7 +15,6 @@
     "prettier-diff": "prettier --loglevel 'warn' --check './src/**/*.js'",
     "build": "swc ./src -d dist",
     "build-watch": "swc ./src -d dist -w",
-    "prepare": "husky install",
     "test": "jest ./src"
   },
   "devDependencies": {
