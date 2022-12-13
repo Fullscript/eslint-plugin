@@ -49,7 +49,7 @@ const WAIT_FOR_PATHS = [
     "BlockStatement",
     "ArrowFunctionExpression",
     "CallExpression",
-    "AwaitExpression",
+    // "AwaitExpression", if we want to check for `await waitFor` instead of just `waitFor`
   ],
   [
     "CallExpression",
@@ -59,7 +59,7 @@ const WAIT_FOR_PATHS = [
     "BlockStatement",
     "ArrowFunctionExpression",
     "CallExpression",
-    "AwaitExpression",
+    // "AwaitExpression",
   ],
   [
     "CallExpression",
@@ -67,7 +67,7 @@ const WAIT_FOR_PATHS = [
     "CallExpression",
     "ArrowFunctionExpression",
     "CallExpression",
-    "AwaitExpression",
+    // "AwaitExpression",
   ],
   [
     "CallExpression",
@@ -76,7 +76,7 @@ const WAIT_FOR_PATHS = [
     "CallExpression",
     "ArrowFunctionExpression",
     "CallExpression",
-    "AwaitExpression",
+    // "AwaitExpression",
   ],
 ];
 
@@ -95,15 +95,11 @@ const create = context => {
       if (!TEST_IDS.includes(value)) return;
       /**
        * Taking expect(...) call as the base
-       * Going up by any of the paths the node should be `await waitFor` expressions
+       * Going up by any of the paths the found node should be `waitFor` expressions
        * Report if it is not.
        * */
-      const awaitExpression = findByPaths(WAIT_FOR_PATHS, node);
-      const isWrappedInWaitFor =
-        isAwaitExpression(awaitExpression) &&
-        isCallExpression(awaitExpression.argument) &&
-        isWaitFor(awaitExpression.argument);
-      if (isWrappedInWaitFor) return;
+      const callExpression = findByPaths(WAIT_FOR_PATHS, node);
+      if (isWaitFor(callExpression)) return;
 
       context.report({
         node,
