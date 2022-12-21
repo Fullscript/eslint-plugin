@@ -1,12 +1,13 @@
 {
   "name": "@fullscript/eslint-plugin",
-  "version": "1.3.0",
+  "version": "1.4.0",
   "description": "Fullscript custom eslint rules",
   "main": "dist/index.js",
   "contributors": [
     "Hossam Mourad",
     "Ryan O'Connor <charle692@gmail.com>",
-    "Aidan Feuerherm <aidan.feuerherm@fullscript.com>"
+    "Aidan Feuerherm <aidan.feuerherm@fullscript.com>",
+    "Valentyn Patsera <valentyn.patsera@fullscript.com>"
   ],
   "license": "MIT",
   "private": false,
