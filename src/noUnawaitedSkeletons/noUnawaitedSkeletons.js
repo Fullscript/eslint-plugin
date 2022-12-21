@@ -9,12 +9,24 @@ const meta = {
   },
   hasSuggestions: false,
   fixable: false,
+  schema: [
+    {
+      type: "object",
+      properties: {
+        testIds: {
+          type: "array",
+          items: {
+            type: "string",
+          },
+        },
+      },
+      required: ["testIds"],
+      additionalProperties: false,
+    },
+  ],
 };
 
 const isWaitFor = node => isCalleName(node, "waitFor");
-
-// avairy skeletons have the below test ids; update if needed;
-const TEST_IDS = ["aviary-skeleton"];
 
 /**
  * @description the below constant array is for the following code examples
@@ -74,6 +86,7 @@ const WAIT_FOR_PATHS = [
 ];
 
 const create = context => {
+  const [{ testIds }] = context.options;
   return {
     CallExpression: node => {
       if (!isExpect(node)) return;
@@ -85,7 +98,7 @@ const create = context => {
       if (!isLiteral(literal)) return;
 
       const { value } = literal;
-      if (!TEST_IDS.includes(value)) return;
+      if (!testIds.includes(value)) return;
       /**
        * Taking expect(...) call as the base
        * Going up by any of the paths the found node should be `waitFor` expressions
@@ -96,7 +109,8 @@ const create = context => {
 
       context.report({
         node,
-        message: "Should be wrapped into `waitFor`",
+        message:
+          "Checks for loading state should be wrapped in a `waitFor` block to prevent act warnings",
       });
     },
   };
