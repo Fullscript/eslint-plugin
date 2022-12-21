@@ -1,10 +1,14 @@
+// types
 const isType = (node, type) => node?.type === type;
 const isCallExpression = node => isType(node, "CallExpression");
 const isLiteral = node => isType(node, "Literal");
 const isAwaitExpression = node => isType(node, "AwaitExpression");
 
+// calee
 const isCalleName = (node, name) => node?.callee?.name === name;
 const isExpect = node => isCalleName(node, "expect");
+
+// finder
 const findNode = (path, tree) => {
   if (!tree || !path) return null;
   const current = path.shift();
@@ -21,13 +25,4 @@ const findByPaths = (paths, tree) => {
   return null;
 };
 
-export {
-  isType,
-  isCallExpression,
-  isLiteral,
-  isAwaitExpression,
-  isCalleName,
-  isExpect,
-  findNode,
-  findByPaths,
-};
+export { isCallExpression, isLiteral, isAwaitExpression, isCalleName, isExpect, findByPaths };
