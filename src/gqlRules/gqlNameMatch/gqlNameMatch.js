@@ -41,15 +41,14 @@ const create = context => {
     return node.tag && node.tag.name === "gql";
   };
 
-  const getNamespaceAndPrefix = () => {
+  const getNamespace = () => {
     const pathToFile = relativePathToFile(context);
     const relativeJsPath = pathToFile.replace("app/javascript/", "");
 
     const namespace = Object.keys(namespaceOperationPrefix).find(namespaceOperationKey =>
       relativeJsPath.startsWith(namespaceOperationKey)
     );
-
-    return { namespace, operationPrefix: namespaceOperationPrefix[namespace] };
+    return { namespace };
   };
 
   const isInIgnoreList = namespace => {
@@ -58,7 +57,7 @@ const create = context => {
 
   const validateOperationName = (gqlOperationText, operationType, node) => {
     const gqlOperationName = operationName(gqlOperationText, operationType);
-    const { namespace } = getNamespaceAndPrefix();
+    const { namespace } = getNamespace();
     const { id } = node;
     const variableName = id.name;
     if (isInIgnoreList(namespace)) {
@@ -70,7 +69,7 @@ const create = context => {
     if (!isOperationNameValid) {
       context.report({
         node: node,
-        message: `"${variableName}" is not a valid operation name, please use "${gqlOperationName}"`,
+        message: `The variable name "${variableName}" should match with the GQL operation name, please use "${gqlOperationName}"`,
       });
     }
   };
