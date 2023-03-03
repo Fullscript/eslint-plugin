@@ -13,10 +13,10 @@ _export(exports, {
     create: ()=>create
 });
 const _utils = require("../utils");
-const _isGQLOperation = require("./isGQLOperation");
+const _isGQLOperation = require("../utils/isGQLOperation");
 const _utils1 = require("../../utils");
-const _operationName = require("./operationName");
-const _sanitizeGqlOperationText = require("./sanitizeGqlOperationText");
+const _operationName = require("../utils/operationName");
+const _sanitizeGqlOperationText = require("../utils/sanitizeGqlOperationText");
 const meta = {
     type: "problem",
     docs: {
