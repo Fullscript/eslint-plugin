@@ -42,7 +42,7 @@ const create = context => {
     return namespaceIgnoreList.some(ignoredNamespace => pathToFile.startsWith(ignoredNamespace));
   };
 
-  const IsOperationNameAndVariableNameSame = (gqlOperationText, node) => {
+  const isOperationNameAndVariableNameSame = (gqlOperationText, node) => {
     const operationType = isQuery(gqlOperationText) ? "Query" : "Mutation";
     const gqlOperationName = operationName(gqlOperationText, operationType);
     const { id } = node;
@@ -66,7 +66,7 @@ const create = context => {
     const { init } = node;
     const templateElementNode = init.quasi;
     const gqlOperationText = sanitizeGqlOperationText(templateElementNode, context);
-    IsOperationNameAndVariableNameSame(gqlOperationText, node);
+    isOperationNameAndVariableNameSame(gqlOperationText, node);
   };
 
   return {
