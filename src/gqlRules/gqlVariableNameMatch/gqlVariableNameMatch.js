@@ -9,7 +9,7 @@ const meta = {
   docs: {
     description:
       "The variable name to which a GQL template literal is assigned should match the GQL operation name Ex: const Patient_Query_UserAvatar = gql` query Patient_Query_UserAvatar...`",
-    category: "gql-name-match",
+    category: "gql-variable-name-match",
     recommended: false,
   },
   fixable: null,
