@@ -43,7 +43,8 @@ const create = context => {
   };
 
   const IsOperationNameAndVariableNameSame = (gqlOperationText, node) => {
-    const gqlOperationName = getOperationName(gqlOperationText);
+    const operationType = isQuery(gqlOperationText) ? "Query" : "Mutation";
+    const gqlOperationName = operationName(gqlOperationText, operationType);
     const { id } = node;
     const variableName = id.name;
     if (isInIgnoreList()) {
@@ -57,14 +58,6 @@ const create = context => {
         node: node,
         message: `The variable name "${variableName}" should match with the GQL operation name, please use "${gqlOperationName}"`,
       });
-    }
-  };
-
-  const getOperationName = gqlOperationText => {
-    if (isQuery(gqlOperationText)) {
-      return operationName(gqlOperationText, "Query");
-    } else if (isMutation(gqlOperationText)) {
-      return operationName(gqlOperationText, "Mutation");
     }
   };
 
