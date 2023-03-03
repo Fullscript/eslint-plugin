@@ -1,5 +1,5 @@
 import { isGqlFile } from "../utils";
-import { isQuery, isMutation } from "../utils/isGQLOperation";
+import { isQuery } from "../utils/isGQLOperation";
 import { relativePathToFile } from "../../utils";
 import { operationName } from "../utils/operationName";
 import { sanitizeGqlOperationText } from "../utils/sanitizeGqlOperationText";
