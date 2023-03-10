@@ -1,8 +1,8 @@
 import { isGqlFile } from "../utils";
-import { isQuery, isMutation } from "./isGQLOperation";
+import { isQuery, isMutation } from "../utils/isGQLOperation";
 import { relativePathToFile } from "../../utils";
-import { operationName } from "./operationName";
-import { sanitizeGqlOperationText } from "./sanitizeGqlOperationText";
+import { operationName } from "../utils/operationName";
+import { sanitizeGqlOperationText } from "../utils/sanitizeGqlOperationText";
 
 const meta = {
   type: "problem",
