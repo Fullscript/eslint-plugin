@@ -1,4 +1,4 @@
-import { isGqlFile } from "../utils";
+import { isGqlFile, isGqlTemplateElement } from "../utils";
 import { isQuery } from "../utils/isGQLOperation";
 import { relativePathToFile } from "../../utils";
 import { operationName } from "../utils/operationName";
@@ -31,11 +31,7 @@ const meta = {
 
 const create = context => {
   const isGqlObjectFile = isGqlFile(context);
-  const { namespaceIgnoreList } = context.options[0];
-
-  const isGqlTemplateElement = node => {
-    return node.tag && node.tag.name === "gql";
-  };
+  const [{ namespaceIgnoreList }] = context.options;
 
   const isInIgnoreList = () => {
     const pathToFile = relativePathToFile(context);

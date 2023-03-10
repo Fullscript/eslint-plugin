@@ -1,0 +1,1 @@
+export { isGqlTemplateElement } from "./isGqlTemplateElement";
