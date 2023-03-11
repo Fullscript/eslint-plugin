@@ -1,4 +1,4 @@
-import { isGqlFile } from "../utils";
+import { isGqlFile, isGqlTemplateElement } from "../utils";
 import { isQuery } from "../utils/isGQLOperation";
 import { relativePathToFile } from "../../utils";
 import { operationName } from "../utils/operationName";
@@ -29,44 +29,35 @@ const meta = {
   ],
 };
 
+const isInIgnoreList = (ignoreList, pathToFile) =>
+  ignoreList.some(name => pathToFile.startsWith(name));
+
+const isOperationNameAndVariableNameSame = (gqlOperationText, node) => {
+  const operationType = isQuery(gqlOperationText) ? "Query" : "Mutation";
+  const gqlOperationName = operationName(gqlOperationText, operationType);
+  const variableName = node.id.name;
+  return !!gqlOperationName.match(variableName);
+};
+
 const create = context => {
+  const pathToFile = relativePathToFile(context);
   const isGqlObjectFile = isGqlFile(context);
-  const { namespaceIgnoreList } = context.options[0];
-
-  const isGqlTemplateElement = node => {
-    return node.tag && node.tag.name === "gql";
-  };
-
-  const isInIgnoreList = () => {
-    const pathToFile = relativePathToFile(context);
-    return namespaceIgnoreList.some(ignoredNamespace => pathToFile.startsWith(ignoredNamespace));
-  };
-
-  const isOperationNameAndVariableNameSame = (gqlOperationText, node) => {
-    const operationType = isQuery(gqlOperationText) ? "Query" : "Mutation";
-    const gqlOperationName = operationName(gqlOperationText, operationType);
-    const { id } = node;
-    const variableName = id.name;
-    if (isInIgnoreList()) {
-      return;
-    }
-
-    const isOperationNameValid = !!gqlOperationName.match(variableName);
-
-    if (!isOperationNameValid) {
-      context.report({
-        node: node,
-        message: `The variable name "${variableName}" should match with the GQL operation name, please use "${gqlOperationName}"`,
-      });
-    }
-  };
+  const [{ namespaceIgnoreList }] = context.options;
 
   const VariableDeclarator = node => {
-    if (!isGqlObjectFile || !isGqlTemplateElement(node.init)) return;
-    const { init } = node;
-    const templateElementNode = init.quasi;
+    if (!isGqlObjectFile) return;
+    if (!isGqlTemplateElement(node.init)) return;
+    if (isInIgnoreList(namespaceIgnoreList, pathToFile)) return;
+
+    const templateElementNode = node.init.quasi;
     const gqlOperationText = sanitizeGqlOperationText(templateElementNode, context);
-    isOperationNameAndVariableNameSame(gqlOperationText, node);
+    const isOperationNameValid = isOperationNameAndVariableNameSame(gqlOperationText, node);
+    if (isOperationNameValid) return;
+
+    context.report({
+      node: node,
+      message: `The variable name "${variableName}" should match with the GQL operation name, please use "${gqlOperationName}"`,
+    });
   };
 
   return {
