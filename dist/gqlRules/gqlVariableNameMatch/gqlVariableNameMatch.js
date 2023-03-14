@@ -71,6 +71,8 @@ const create = (context)=>{
         const { init  } = node;
         const templateElementNode = init.quasi;
         const gqlOperationText = (0, _sanitizeGqlOperationText.sanitizeGqlOperationText)(templateElementNode, context);
+        // Return early to avoid checking fragments
+        if (!(0, _isGQLOperation.isQuery)(gqlOperationText) && !(0, _isGQLOperation.isMutation)(gqlOperationText)) return;
         isOperationNameAndVariableNameSame(gqlOperationText, node);
     };
     return {

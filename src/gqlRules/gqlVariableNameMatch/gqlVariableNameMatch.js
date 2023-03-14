@@ -1,5 +1,5 @@
 import { isGqlFile } from "../utils";
-import { isQuery } from "../utils/isGQLOperation";
+import { isQuery, isMutation } from "../utils/isGQLOperation";
 import { relativePathToFile } from "../../utils";
 import { operationName } from "../utils/operationName";
 import { sanitizeGqlOperationText } from "../utils/sanitizeGqlOperationText";
@@ -66,6 +66,8 @@ const create = context => {
     const { init } = node;
     const templateElementNode = init.quasi;
     const gqlOperationText = sanitizeGqlOperationText(templateElementNode, context);
+    // Return early to avoid checking fragments
+    if (!isQuery(gqlOperationText) && !isMutation(gqlOperationText)) return;
     isOperationNameAndVariableNameSame(gqlOperationText, node);
   };
 
