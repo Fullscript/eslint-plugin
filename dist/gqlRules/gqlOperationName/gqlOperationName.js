@@ -37,10 +37,14 @@ const meta = {
                 },
                 namespaceOperationPrefix: {
                     type: "object"
+                },
+                sourcePath: {
+                    type: "string"
                 }
             },
             required: [
-                "namespaceOperationPrefix"
+                "namespaceOperationPrefix",
+                "sourcePath"
             ],
             additionalProperties: false
         }
@@ -48,13 +52,14 @@ const meta = {
 };
 const create = (context)=>{
     const isGqlObjectFile = (0, _utils.isGqlFile)(context);
-    const { namespaceOperationPrefix , namespaceIgnoreList  } = context.options[0];
+    const { namespaceOperationPrefix , namespaceIgnoreList: initialNamespaceIgnoreList , sourcePath  } = context.options[0];
+    const namespaceIgnoreList = initialNamespaceIgnoreList ?? [];
     const isGqlTemplateElement = (node)=>{
         return node.tag && node.tag.name === "gql";
     };
     const getNamespaceAndPrefix = ()=>{
         const pathToFile = (0, _utils1.relativePathToFile)(context);
-        const relativeJsPath = pathToFile.replace("app/javascript/", "");
+        const relativeJsPath = pathToFile.replace(sourcePath, "");
         const namespace = Object.keys(namespaceOperationPrefix).find((namespaceOperationKey)=>relativeJsPath.startsWith(namespaceOperationKey));
         return {
             namespace,
