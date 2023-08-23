@@ -13,6 +13,7 @@ const _noRenamedTranslationImport = require("./noRenamedTranslationImport");
 const _noUnawaitedSkeletons = require("./noUnawaitedSkeletons");
 const _oneTranslationImport = require("./oneTranslationImport");
 const _noJestInProduction = require("./noJestInProduction");
+const _noCreateMockInSetFunctions = require("./noCreateMockInSetFunctions");
 const rules = {
     "one-translation-import-per-file": _oneTranslationImport.oneTranslationImport,
     "no-renamed-translation-import": _noRenamedTranslationImport.noRenamedTranslationImport,
@@ -22,5 +23,6 @@ const rules = {
     "cross-reference": _crossReference.crossReference,
     "circular-dependency": _circularDependency.circularDependency,
     "no-unawaited-skeletons": _noUnawaitedSkeletons.noUnawaitedSkeletons,
-    "no-jest-in-production": _noJestInProduction.noJestInProduction
+    "no-jest-in-production": _noJestInProduction.noJestInProduction,
+    "no-createMock-in-set-functions": _noCreateMockInSetFunctions.noCreateMockInSetFunctions
 };

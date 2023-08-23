@@ -10,19 +10,27 @@ function _export(target, all) {
     });
 }
 _export(exports, {
-    isCallExpression: ()=>isCallExpression,
-    isLiteral: ()=>isLiteral,
+    findByPaths: ()=>findByPaths,
+    isArrayExpression: ()=>isArrayExpression,
     isAwaitExpression: ()=>isAwaitExpression,
     isCalleName: ()=>isCalleName,
+    isCallExpression: ()=>isCallExpression,
     isExpect: ()=>isExpect,
-    findByPaths: ()=>findByPaths
+    isLiteral: ()=>isLiteral,
+    isObjectExpression: ()=>isObjectExpression,
+    isProperty: ()=>isProperty,
+    isSpreadElement: ()=>isSpreadElement
 });
 const isType = (node, type)=>{
     return (node === null || node === void 0 ? void 0 : node.type) === type;
 };
 const isCallExpression = (node)=>isType(node, "CallExpression");
+const isObjectExpression = (node)=>isType(node, "ObjectExpression");
+const isArrayExpression = (node)=>isType(node, "ArrayExpression");
+const isSpreadElement = (node)=>isType(node, "SpreadElement");
 const isLiteral = (node)=>isType(node, "Literal");
 const isAwaitExpression = (node)=>isType(node, "AwaitExpression");
+const isProperty = (node)=>isType(node, "Property");
 // calee
 const isCalleName = (node, name)=>{
     var _node_callee;
