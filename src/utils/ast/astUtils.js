@@ -1,8 +1,12 @@
 // types
 const isType = (node, type) => node?.type === type;
 const isCallExpression = node => isType(node, "CallExpression");
+const isObjectExpression = node => isType(node, "ObjectExpression");
+const isArrayExpression = node => isType(node, "ArrayExpression");
+const isSpreadElement = node => isType(node, "SpreadElement");
 const isLiteral = node => isType(node, "Literal");
 const isAwaitExpression = node => isType(node, "AwaitExpression");
+const isProperty = node => isType(node, "Property");
 
 // calee
 const isCalleName = (node, name) => node?.callee?.name === name;
@@ -25,4 +29,15 @@ const findByPaths = (paths, tree) => {
   return null;
 };
 
-export { isCallExpression, isLiteral, isAwaitExpression, isCalleName, isExpect, findByPaths };
+export {
+  findByPaths,
+  isArrayExpression,
+  isAwaitExpression,
+  isCalleName,
+  isCallExpression,
+  isExpect,
+  isLiteral,
+  isObjectExpression,
+  isProperty,
+  isSpreadElement,
+};
