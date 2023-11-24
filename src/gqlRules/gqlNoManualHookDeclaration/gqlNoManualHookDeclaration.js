@@ -37,8 +37,6 @@ const create = context => {
     return namespaceIgnoreList.some(ignoredNamespace => pathToFile.startsWith(ignoredNamespace));
   };
 
-  if (isInIgnoreList()) return;
-
   const isHookDeclaredManually = (node, name) => {
     if (reactHookPrefix.test(name)) {
       context.report({
@@ -50,7 +48,7 @@ const create = context => {
 
   const ExportNamedDeclaration = node => {
     // not a gql file or no value exported
-    if (!isGqlObjectFile || node.exportKind !== "value") return;
+    if (isInIgnoreList() || !isGqlObjectFile || node.exportKind !== "value") return;
 
     // When the variable is directly exported like so export const usePatientQuery =...
     if (node.declaration && node.declaration.declarations) {
