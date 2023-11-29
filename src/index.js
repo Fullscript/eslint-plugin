@@ -6,6 +6,7 @@ import { noUnawaitedSkeletons } from "./noUnawaitedSkeletons";
 import { oneTranslationImport } from "./oneTranslationImport";
 import { noJestInProduction } from "./noJestInProduction";
 import { noCreateMockInSetFunctions } from "./noCreateMockInSetFunctions";
+import { noInvalidFeature } from "./noInvalidFeature";
 
 const rules = {
   "one-translation-import-per-file": oneTranslationImport,
@@ -18,6 +19,7 @@ const rules = {
   "no-unawaited-skeletons": noUnawaitedSkeletons,
   "no-jest-in-production": noJestInProduction,
   "no-createMock-in-set-functions": noCreateMockInSetFunctions,
+  "no-invalid-feature": noInvalidFeature,
 };
 
 export { rules };
