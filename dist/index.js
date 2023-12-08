@@ -26,5 +26,6 @@ const rules = {
     "no-unawaited-skeletons": _noUnawaitedSkeletons.noUnawaitedSkeletons,
     "no-jest-in-production": _noJestInProduction.noJestInProduction,
     "no-createMock-in-set-functions": _noCreateMockInSetFunctions.noCreateMockInSetFunctions,
-    "no-invalid-feature": _noInvalidFeature.noInvalidFeature
+    "no-invalid-feature": _noInvalidFeature.noInvalidFeature,
+    "gql-no-manual-hook-declaration": _gqlRules.gqlNoManualHookDeclaration
 };
