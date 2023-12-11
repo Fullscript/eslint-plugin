@@ -1,6 +1,11 @@
 import { circularDependency } from "./circularDependency";
 import { crossReference } from "./crossReference";
-import { gqlObjects, gqlOperationName, gqlVariableNameMatch } from "./gqlRules";
+import {
+  gqlObjects,
+  gqlOperationName,
+  gqlVariableNameMatch,
+  gqlNoManualHookDeclaration,
+} from "./gqlRules";
 import { noRenamedTranslationImport } from "./noRenamedTranslationImport";
 import { noUnawaitedSkeletons } from "./noUnawaitedSkeletons";
 import { oneTranslationImport } from "./oneTranslationImport";
@@ -20,6 +25,7 @@ const rules = {
   "no-jest-in-production": noJestInProduction,
   "no-createMock-in-set-functions": noCreateMockInSetFunctions,
   "no-invalid-feature": noInvalidFeature,
+  "gql-no-manual-hook-declaration": gqlNoManualHookDeclaration,
 };
 
 export { rules };
