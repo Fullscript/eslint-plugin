@@ -1,6 +1,6 @@
 {
   "name": "@fullscript/eslint-plugin",
-  "version": "2.2.0",
+  "version": "2.3.0",
   "description": "Fullscript custom eslint rules",
   "main": "dist/index.js",
   "contributors": [
@@ -9,7 +9,8 @@
     "Aidan Feuerherm <aidan.feuerherm@fullscript.com>",
     "Valentyn Patsera <valentyn.patsera@fullscript.com>",
     "Omar Nasr <omar.nasr@fullscript.com>",
-    "Asuka Kuwahara <asuka.kuwahara@fullscript.com>"
+    "Asuka Kuwahara <asuka.kuwahara@fullscript.com>",
+    "Benaiah Barango <benaiah.barango@fullscript.com>"
   ],
   "license": "MIT",
   "private": false,
