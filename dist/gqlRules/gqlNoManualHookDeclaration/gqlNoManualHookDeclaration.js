@@ -37,7 +37,7 @@ const meta = {
         }
     ]
 };
-const reactHookPrefix = new RegExp("use\\w+");
+const reactHookPrefix = new RegExp("^use\\w+");
 const create = (context)=>{
     var _context_options, _context_options_;
     const isGqlObjectFile = (0, _utils.isGqlFile)(context);
