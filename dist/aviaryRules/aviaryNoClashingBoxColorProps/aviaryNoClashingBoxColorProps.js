@@ -27,8 +27,8 @@ const create = (context)=>{
         JSXOpeningElement: (node)=>{
             if (node.name.name !== "Box") return;
             const attributes = node.attributes;
-            const isColor = attributes.find((attr)=>attr.name.name === "isColor");
-            const accentColor = attributes.find((attr)=>attr.name.name === "accentColor");
+            const isColor = attributes.find((attr)=>attr.type === "JSXAttribute" && attr.name.name === "isColor");
+            const accentColor = attributes.find((attr)=>attr.type === "JSXAttribute" && attr.name.name === "accentColor");
             if (isColor && accentColor) {
                 context.report({
                     node,
