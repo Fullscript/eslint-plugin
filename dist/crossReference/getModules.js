@@ -6,13 +6,13 @@ Object.defineProperty(exports, "getModules", {
     enumerable: true,
     get: ()=>getModules
 });
-const _fs = /*#__PURE__*/ _interopRequireDefault(require("fs"));
-const _path = /*#__PURE__*/ _interopRequireDefault(require("path"));
+const _nodeFs = /*#__PURE__*/ _interopRequireDefault(require("node:fs"));
+const _nodePath = /*#__PURE__*/ _interopRequireDefault(require("node:path"));
 function _interopRequireDefault(obj) {
     return obj && obj.__esModule ? obj : {
         default: obj
     };
 }
 const getModules = (absoluteAppPath, dir)=>{
-    return _fs.default.readdirSync(_path.default.resolve(absoluteAppPath, dir)).map((name)=>_path.default.join(dir, name)).map((name)=>`@${name}`);
+    return _nodeFs.default.readdirSync(_nodePath.default.resolve(absoluteAppPath, dir)).map((name)=>_nodePath.default.join(dir, name)).map((name)=>`@${name}`);
 };

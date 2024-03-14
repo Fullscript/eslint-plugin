@@ -12,7 +12,7 @@ _export(exports, {
     meta: ()=>meta,
     create: ()=>create
 });
-const _path = /*#__PURE__*/ _interopRequireDefault(require("path"));
+const _nodePath = /*#__PURE__*/ _interopRequireDefault(require("node:path"));
 const _getModules = require("./getModules");
 function _interopRequireDefault(obj) {
     return obj && obj.__esModule ? obj : {
@@ -82,22 +82,25 @@ const create = (context)=>{
         return configEntry;
     });
     const getModule = (filePath, { directory  })=>{
-        const basePath = _path.default.join(relativeAppPath, directory);
+        const basePath = _nodePath.default.join(relativeAppPath, directory);
         const jsIndex = filePath.indexOf(basePath);
         if (jsIndex === -1) {
             return null;
         }
         const name = filePath.substring(jsIndex).replace(relativeAppPath, "").replace(directory, "").split("/").filter((val)=>val)[0];
-        return _path.default.join(directory, name);
+        return _nodePath.default.join(directory, name);
     };
     const getImportModule = (importPath, config)=>{
         const jsModule = getModule(importPath, config);
         if (jsModule) {
             return jsModule;
         }
-        return config.modules.find((moduleName)=>importPath.startsWith(`${moduleName}/`)) || config.modules.find((moduleName)=>importPath.startsWith(moduleName));
+        // Checks to see if the import path is a namespace within the application or an external node module
+        const isImportPathAnAppNamespace = config.modules.find((moduleName)=>moduleName.startsWith(importPath.split("/")[0]));
+        return isImportPathAnAppNamespace && (config.modules.find((moduleName)=>importPath.startsWith(`${moduleName}/`)) || config.modules.find((moduleName)=>importPath.startsWith(moduleName)));
     };
     const isValidConfig = (node, config)=>{
+        debugger;
         const fileModule = getModule(context.getFilename(), config);
         if (!fileModule) return true;
         const whitelisted = config.allowlistDirectories.includes(fileModule);
