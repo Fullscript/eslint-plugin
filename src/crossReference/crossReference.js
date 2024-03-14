@@ -1,4 +1,4 @@
-import path from "path";
+import path from "node:path";
 import { getModules } from "./getModules";
 
 const meta = {
@@ -81,13 +81,20 @@ const create = context => {
       return jsModule;
     }
 
+    // Checks to see if the import path is a namespace within the application or an external node module
+    const isImportPathAnAppNamespace = config.modules.find(moduleName =>
+      moduleName.startsWith(importPath.split("/")[0])
+    );
+
     return (
-      config.modules.find(moduleName => importPath.startsWith(`${moduleName}/`)) ||
-      config.modules.find(moduleName => importPath.startsWith(moduleName))
+      isImportPathAnAppNamespace &&
+      (config.modules.find(moduleName => importPath.startsWith(`${moduleName}/`)) ||
+        config.modules.find(moduleName => importPath.startsWith(moduleName)))
     );
   };
 
   const isValidConfig = (node, config) => {
+    debugger;
     const fileModule = getModule(context.getFilename(), config);
     if (!fileModule) return true;
 
