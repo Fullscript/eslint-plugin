@@ -23,10 +23,8 @@ const meta = {
   ],
 };
 
-let validFeatures;
 const readFeatureYml = staticFeaturesFilePath => {
-  if (validFeatures) return;
-  validFeatures = load(readFileSync(staticFeaturesFilePath, "utf8"));
+  return load(readFileSync(staticFeaturesFilePath, "utf8"));
 };
 
 /**
@@ -39,10 +37,14 @@ const create = context => {
   if (!context.getFilename().endsWith("flipper.d.ts")) return {};
 
   const { staticFeaturesFilePath } = context.options[0];
+  let validFeatures;
 
   readFeatureYml(staticFeaturesFilePath);
 
   return {
+    Program: () => {
+      validFeatures = readFeatureYml(staticFeaturesFilePath);
+    },
     TSLiteralType: node => {
       const featureName = node?.literal?.value;
 
