@@ -38,12 +38,9 @@ This will link the package to your current project and allows you to use the loc
 Now you’re ready to develop, happy coding!
 
 ### Once the PR is approved:
-1. Reach out to the maintainer (post in the #hopper channel on slack) to bump the version and create a new release
-2. Once the new release is ready, create an MR in In your hw-admin repo to apply the new ESLint rule ([example MR](https://git.fullscript.io/developers/hw-admin/-/merge_requests/43442))
+1. Reach out to the maintainer (post in the hopper channel on slack) to bump the version and create a new release
+2. Once the new release is ready, create an MR in the main app repo to apply the new ESLint rule
 3. Once it’s merged, announce in the #feds channel that the new rule is applied!
-
-    <img src="./assets/announcement-1.png" alt="Add a new rule" style="max-width: 600px">
-    <img src="./assets/announcement-2.png" alt="Add a new rule" style="max-width: 600px">
 
 ### Tips:
 ESLint uses Abstract Syntax Trees (AST). AST is a tree representation of the source code that tells us about the code structure. Tools like ESLint create AST for a given piece of code and execute rules on it. To figure out specific instructions for our custom rule, we need to inspect AST manually.
@@ -64,7 +61,3 @@ https://developers.mews.com/how-to-write-custom-eslint-rules/
 
 How to write a custom ESLint rule
 https://blog.scottlogic.com/2021/09/06/how-to-write-an-es-lint-rule-for-beginners.html
-
-Video where Ryan explains AST Explorer
-https://drive.google.com/file/d/1oQ3nnYVeDA7Dcs0RIzgZamYreFAbMS33/view
-
