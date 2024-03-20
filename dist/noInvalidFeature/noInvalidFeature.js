@@ -37,10 +37,8 @@ const meta = {
         }
     ]
 };
-let validFeatures;
 const readFeatureYml = (staticFeaturesFilePath)=>{
-    if (validFeatures) return;
-    validFeatures = (0, _jsYaml.load)((0, _fs.readFileSync)(staticFeaturesFilePath, "utf8"));
+    return (0, _jsYaml.load)((0, _fs.readFileSync)(staticFeaturesFilePath, "utf8"));
 };
 /**
  * Looks through flipper.d.ts and ensures that all flippers listed appear in features.yml
@@ -50,8 +48,12 @@ const readFeatureYml = (staticFeaturesFilePath)=>{
  */ const create = (context)=>{
     if (!context.getFilename().endsWith("flipper.d.ts")) return {};
     const { staticFeaturesFilePath  } = context.options[0];
+    let validFeatures;
     readFeatureYml(staticFeaturesFilePath);
     return {
+        Program: ()=>{
+            validFeatures = readFeatureYml(staticFeaturesFilePath);
+        },
         TSLiteralType: (node)=>{
             var _node_literal;
             const featureName = node === null || node === void 0 ? void 0 : (_node_literal = node.literal) === null || _node_literal === void 0 ? void 0 : _node_literal.value;
