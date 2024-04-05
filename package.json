@@ -15,8 +15,8 @@
   "license": "MIT",
   "private": false,
   "scripts": {
-    "prettier-format": "prettier --loglevel 'warn' --write './src/**/*.js'",
-    "prettier-diff": "prettier --loglevel 'warn' --check './src/**/*.js'",
+    "prettier-format": "prettier --loglevel 'warn' --write './src/**/*.ts'",
+    "prettier-diff": "prettier --loglevel 'warn' --check './src/**/*.ts'",
     "build": "swc ./src -d dist",
     "build-watch": "swc ./src -d dist -w",
     "test": "jest ./src",
