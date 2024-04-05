@@ -19,7 +19,8 @@
     "prettier-diff": "prettier --loglevel 'warn' --check './src/**/*.js'",
     "build": "swc ./src -d dist",
     "build-watch": "swc ./src -d dist -w",
-    "test": "jest ./src"
+    "test": "jest ./src",
+    "type-check": "tsc --noEmit"
   },
   "dependencies": {
     "js-yaml": "^4.1.0"
