@@ -1,4 +1,4 @@
-import { sanitizeGqlOperationText } from "./sanitizeGqlOperationText.js";
+import { sanitizeGqlOperationText } from "./sanitizeGqlOperationText";
 
 describe("sanitizeGqlOperationText", () => {
   describe("when the gql operation is valid", () => {

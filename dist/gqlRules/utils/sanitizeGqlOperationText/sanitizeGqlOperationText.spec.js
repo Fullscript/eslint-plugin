@@ -2,7 +2,7 @@
 Object.defineProperty(exports, "__esModule", {
     value: true
 });
-const _sanitizeGqlOperationTextJs = require("./sanitizeGqlOperationText.js");
+const _sanitizeGqlOperationText = require("./sanitizeGqlOperationText");
 describe("sanitizeGqlOperationText", ()=>{
     describe("when the gql operation is valid", ()=>{
         it("responds with the firstLine of the gql operation", ()=>{
@@ -23,7 +23,7 @@ describe("sanitizeGqlOperationText", ()=>{
                         getText: ()=>gqlOperation
                     })
             };
-            expect((0, _sanitizeGqlOperationTextJs.sanitizeGqlOperationText)(null, context)).toEqual(firstLine);
+            expect((0, _sanitizeGqlOperationText.sanitizeGqlOperationText)(null, context)).toEqual(firstLine);
         });
     });
     describe("when the gql operation is valid and multiline", ()=>{
@@ -46,7 +46,7 @@ describe("sanitizeGqlOperationText", ()=>{
                         getText: ()=>gqlOperation
                     })
             };
-            expect((0, _sanitizeGqlOperationTextJs.sanitizeGqlOperationText)(null, context)).toEqual("query ProductViewProductWithVariants_Patient_Query(");
+            expect((0, _sanitizeGqlOperationText.sanitizeGqlOperationText)(null, context)).toEqual("query ProductViewProductWithVariants_Patient_Query(");
         });
     });
     describe("when the gql operation is invalid", ()=>{
@@ -68,7 +68,7 @@ describe("sanitizeGqlOperationText", ()=>{
                         getText: ()=>gqlOperation
                     })
             };
-            expect((0, _sanitizeGqlOperationTextJs.sanitizeGqlOperationText)(null, context)).toEqual("");
+            expect((0, _sanitizeGqlOperationText.sanitizeGqlOperationText)(null, context)).toEqual("");
         });
     });
 });

@@ -12,7 +12,7 @@ describe("relativePathToFile", () => {
     };
     initMocks();
 
-    const { relativePathToFile } = await import("./relativePathToFile.js");
+    const { relativePathToFile } = await import("./relativePathToFile");
 
     const relativeProjectFilename = "app/javascript/shared/data/queries/foobar.js";
 

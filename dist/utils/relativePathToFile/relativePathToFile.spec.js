@@ -48,7 +48,7 @@ describe("relativePathToFile", ()=>{
             resolve: jest.fn(()=>"/Users/foo/Dev/hw-admin/eslint/GqlRules/GqlOperationName/GqlOperationName.js")
         };
         initMocks();
-        const { relativePathToFile  } = await Promise.resolve().then(()=>/*#__PURE__*/ _interopRequireWildcard(require("./relativePathToFile.js")));
+        const { relativePathToFile  } = await Promise.resolve().then(()=>/*#__PURE__*/ _interopRequireWildcard(require("./relativePathToFile")));
         const relativeProjectFilename = "app/javascript/shared/data/queries/foobar.js";
         const filenamePath = relativePathToFile({
             getPhysicalFilename: ()=>`/Users/foo/Dev/hw-admin/${relativeProjectFilename}`
