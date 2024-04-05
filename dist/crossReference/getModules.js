@@ -14,7 +14,5 @@ function _interopRequireDefault(obj) {
     };
 }
 const getModules = (absoluteAppPath, dir)=>{
-    const hoge = 1;
-    hoge.length;
     return _nodeFs.default.readdirSync(_nodePath.default.resolve(absoluteAppPath, dir)).map((name)=>_nodePath.default.join(dir, name)).map((name)=>`@${name}`);
 };
