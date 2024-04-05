@@ -1,0 +1,8 @@
+{
+  "compilerOptions": {
+    "module": "nodenext",
+    "moduleResolution": "nodenext",
+  },
+  "include": ["src"],
+  "exclude": ["node_modules"]
+}
