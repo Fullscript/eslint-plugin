@@ -28,6 +28,7 @@
     "@swc/cli": "^0.1.57",
     "@swc/core": "^1.3.20",
     "@swc/jest": "^0.2.23",
+    "@types/node": "^20.12.4",
     "@typescript-eslint/utils": "^6.13.1",
     "chokidar": "^3.5.3",
     "core-js": "^3.26.1",
