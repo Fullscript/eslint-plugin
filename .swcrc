@@ -1,7 +1,11 @@
 {
   "$schema": "https://json.schemastore.org/swcrc",
   "jsc": {
-    "target": "es2020"
+    "target": "es2020",
+    "parser": {
+      "syntax": "typescript",
+      "tsx": false
+    }
   },
   "module": {
     "type": "commonjs"
