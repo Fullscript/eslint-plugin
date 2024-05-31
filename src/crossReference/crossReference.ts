@@ -94,7 +94,6 @@ const create = context => {
   };
 
   const isValidConfig = (node, config) => {
-    debugger;
     const fileModule = getModule(context.getFilename(), config);
     if (!fileModule) return true;
 
