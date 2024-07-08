@@ -100,7 +100,6 @@ const create = (context)=>{
         return isImportPathAnAppNamespace && (config.modules.find((moduleName)=>importPath.startsWith(`${moduleName}/`)) || config.modules.find((moduleName)=>importPath.startsWith(moduleName)));
     };
     const isValidConfig = (node, config)=>{
-        debugger;
         const fileModule = getModule(context.getFilename(), config);
         if (!fileModule) return true;
         const whitelisted = config.allowlistDirectories.includes(fileModule);
