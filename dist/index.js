@@ -16,6 +16,7 @@ const _noJestInProduction = require("./noJestInProduction");
 const _noCreateMockInSetFunctions = require("./noCreateMockInSetFunctions");
 const _noInvalidFeature = require("./noInvalidFeature");
 const _aviaryRules = require("./aviaryRules");
+const _noBannedTranslationWords = require("./noBannedTranslationWords");
 const rules = {
     "one-translation-import-per-file": _oneTranslationImport.oneTranslationImport,
     "no-renamed-translation-import": _noRenamedTranslationImport.noRenamedTranslationImport,
@@ -29,5 +30,6 @@ const rules = {
     "no-createMock-in-set-functions": _noCreateMockInSetFunctions.noCreateMockInSetFunctions,
     "no-invalid-feature": _noInvalidFeature.noInvalidFeature,
     "gql-no-manual-hook-declaration": _gqlRules.gqlNoManualHookDeclaration,
-    "aviary-no-clashing-box-color-props": _aviaryRules.aviaryNoClashingBoxColorProps
+    "aviary-no-clashing-box-color-props": _aviaryRules.aviaryNoClashingBoxColorProps,
+    "banned-translation-words": _noBannedTranslationWords.noBannedTranslationWords
 };
