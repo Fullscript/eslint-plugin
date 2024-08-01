@@ -13,6 +13,7 @@ import { noJestInProduction } from "./noJestInProduction";
 import { noCreateMockInSetFunctions } from "./noCreateMockInSetFunctions";
 import { noInvalidFeature } from "./noInvalidFeature";
 import { aviaryNoClashingBoxColorProps } from "./aviaryRules";
+import { noBannedTranslationWords } from "./noBannedTranslationWords";
 
 const rules = {
   "one-translation-import-per-file": oneTranslationImport,
@@ -28,6 +29,7 @@ const rules = {
   "no-invalid-feature": noInvalidFeature,
   "gql-no-manual-hook-declaration": gqlNoManualHookDeclaration,
   "aviary-no-clashing-box-color-props": aviaryNoClashingBoxColorProps,
+  "banned-translation-words": noBannedTranslationWords,
 };
 
 export { rules };
