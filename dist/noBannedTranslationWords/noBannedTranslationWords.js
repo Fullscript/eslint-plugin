@@ -59,6 +59,7 @@ const create = (context)=>{
     return {
         Literal (node) {
             if (typeof node.value !== 'string') return;
+            if (node.parent.type !== 'Property') return;
             const result = searchForBannedWords(bannedWords, node.value);
             if (!isEmpty(result)) {
                 context.report({
