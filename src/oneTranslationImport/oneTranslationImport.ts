@@ -1,13 +1,19 @@
 import { isTranslationSource } from "../utils";
 
+const DUPLICATED_IMPORT_ERROR_KEY = "duplicatedImport";
+
 const meta = {
-  type: "problem",
+  type: "problem" as const,
   docs: {
     description: "Enforces that there's just one translation import per file",
     category: "translation-import",
-    recommended: false,
   },
   fixable: null,
+  schema: [],
+  messages: {
+    [DUPLICATED_IMPORT_ERROR_KEY]:
+      "There's already a translation import in this file, only one import per file is allowed.",
+  },
 };
 
 const create = context => {
@@ -23,8 +29,7 @@ const create = context => {
         } else {
           context.report({
             node: node,
-            message:
-              "There's already a translation import in this file, only one import per file is allowed.",
+            messageId: DUPLICATED_IMPORT_ERROR_KEY,
           });
         }
       }
@@ -32,4 +37,4 @@ const create = context => {
   };
 };
 
-export { meta, create };
+export { meta, create, DUPLICATED_IMPORT_ERROR_KEY };
