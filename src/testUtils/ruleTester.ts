@@ -7,7 +7,7 @@ const ruleTester = new RuleTester({
   },
   defaultFilenames: {
     ts: "src/index.ts",
-    tsx: "react.tsx",
+    tsx: "",
   },
 });
 
