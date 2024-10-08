@@ -1,6 +1,6 @@
-import { type TSESTree } from '@typescript-eslint/types';
-import type { ImplicitAnyContext } from '../type';
-import { DETECTED_IMPLICIT_ANY_ERROR_KEY } from '../messageIds';
+import { type TSESTree } from "@typescript-eslint/types";
+import type { ImplicitAnyContext } from "../type";
+import { DETECTED_IMPLICIT_ANY_ERROR_KEY } from "../messageIds";
 
 export const lintTSPropertySignature = (
   context: ImplicitAnyContext,
@@ -13,7 +13,7 @@ export const lintTSPropertySignature = (
       *fix(fixer) {
         const key = node.key as TSESTree.Identifier;
         yield fixer.replaceText(node, key.name);
-        yield fixer.insertTextAfter(node, ': any;');
+        yield fixer.insertTextAfter(node, ": any;");
       },
     });
   }
