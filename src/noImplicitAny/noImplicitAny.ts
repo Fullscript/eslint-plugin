@@ -12,7 +12,7 @@ export const meta = {
     messages: { [DETECTED_IMPLICIT_ANY_ERROR_KEY]: 'An implicit any is detected. Add a specific type or an explicit any type.' },
     fixable: 'code',
     schema: [],
-};
+} as const;
 
 function hasJSExtension(filePath: string) {
     return /\.(js|jsx|mjs|cjs)$/.test(filePath);
