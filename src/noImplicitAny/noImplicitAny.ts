@@ -29,5 +29,15 @@ export const create = (context: ImplicitAnyContext) => {
     TSPropertySignature: (node: TSESTree.TSPropertySignature) => {
       lintTSPropertySignature(context, node);
     },
+    // TODO: comming soon
+    // FunctionDeclaration: (node) => {},
+    // FunctionExpression: (node) => {},
+    // ArrowFunctionExpression: (node) => {},
+    // TSFunctionType: (node) => {},
+    // VariableDeclarator: (node) => {},
+    // MemberExpression: (node) => {},
+    // ReturnStatement: (node) => {},
+    // ObjectExpression: (node) => {},
+    // PropertyDefinition: (node) => {}
   };
 };
