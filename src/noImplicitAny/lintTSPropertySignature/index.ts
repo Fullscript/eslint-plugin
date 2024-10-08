@@ -1,0 +1,1 @@
+export { lintTSPropertySignature } from './lintTSPropertySIgnature';
