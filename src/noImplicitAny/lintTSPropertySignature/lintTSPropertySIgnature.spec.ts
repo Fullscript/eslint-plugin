@@ -35,7 +35,7 @@ ruleTester.run("ts-property-signature", rule, {
   invalid: [
     {
       code: `
-          interface Foo {
+          type Foo = {
             property1;
             nestedObject: {
               property2
@@ -43,7 +43,7 @@ ruleTester.run("ts-property-signature", rule, {
           }
         `,
       output: `
-          interface Foo {
+          type Foo = {
             property1: any;
             nestedObject: {
               property2: any;
@@ -57,7 +57,7 @@ ruleTester.run("ts-property-signature", rule, {
     },
     {
       code: `
-          type Foo = {
+          interface Foo {
             property1;
             nestedObject: {
               property2
@@ -65,7 +65,7 @@ ruleTester.run("ts-property-signature", rule, {
           }
         `,
       output: `
-          type Foo = {
+          interface Foo {
             property1: any;
             nestedObject: {
               property2: any;
