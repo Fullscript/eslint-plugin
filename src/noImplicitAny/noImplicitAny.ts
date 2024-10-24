@@ -30,7 +30,7 @@ export const create = (context: ImplicitAnyContext) => {
     TSPropertySignature: (node: TSESTree.TSPropertySignature) => {
       lintTSPropertySignature(context, node);
     },
-    VariableDeclarator: node => {
+    VariableDeclarator: (node: TSESTree.VariableDeclarator) => {
       lintVariableDeclarator(context, node);
     },
     // TODO: comming soon
