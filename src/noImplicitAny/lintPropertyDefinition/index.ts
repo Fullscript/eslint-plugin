@@ -1,0 +1,1 @@
+export { lintPropertyDefinition } from "./lintPropertyDefinition";
