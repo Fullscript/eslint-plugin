@@ -25,6 +25,10 @@ export const lintVariableDeclarator = (
     });
   }
 
+  // When strictNullChecks is disabled, null, undefined, void are infered as implicit any.
+  // In that case, type annotation should be added to avoid implicit any.
+  // On the other hand, when strictNullChecks is enabled, null, undefined and void are infered as null or undefined (void is infered as undefined).
+  // Therefore, we don't need to add type annotation
   if (!enabledStrictNullChecks(context)) {
     if (isNullOrUndefinedOrVoid(node.init)) {
       context.report({
