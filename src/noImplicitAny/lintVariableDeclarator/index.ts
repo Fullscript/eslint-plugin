@@ -1,0 +1,1 @@
+export { lintVariableDeclarator } from "./lintVariableDeclarator";
