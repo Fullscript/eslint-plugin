@@ -2,6 +2,7 @@ import type { TSESTree } from "@typescript-eslint/types";
 import { lintTSPropertySignature } from "./lintTSPropertySignature";
 import { lintVariableDeclarator } from "./lintVariableDeclarator";
 import { lintPropertyDefinition } from "./lintPropertyDefinition";
+import { lintObjectExpression } from "./lintObjectExpression";
 import type { ImplicitAnyContext } from "./type";
 
 const DETECTED_IMPLICIT_ANY_ERROR_KEY = "detectedImplicitAny";
@@ -37,6 +38,9 @@ export const create = (context: ImplicitAnyContext) => {
     PropertyDefinition: (node: TSESTree.PropertyDefinition) => {
       lintPropertyDefinition(context, node);
     },
+    ObjectExpression: (node: TSESTree.ObjectExpression) => {
+      lintObjectExpression(context, node);
+    },
     // TODO: comming soon
     // FunctionDeclaration: (node) => {},
     // FunctionExpression: (node) => {},
@@ -44,6 +48,5 @@ export const create = (context: ImplicitAnyContext) => {
     // TSFunctionType: (node) => {},
     // MemberExpression: (node) => {},
     // ReturnStatement: (node) => {},
-    // ObjectExpression: (node) => {},
   };
 };
