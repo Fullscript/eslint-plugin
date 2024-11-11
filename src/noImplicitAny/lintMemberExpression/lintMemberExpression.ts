@@ -5,7 +5,8 @@ import { DETECTED_IMPLICIT_ANY_ERROR_KEY } from "../messageIds";
 
 import * as ts from "typescript";
 
-function hasTypeAnnotationInAncestors(
+// Check if a given node has a type annotation in ancestors by traversing up AST.
+function hasTypeAnnotationInAncestorNode(
   parserServices: ParserServicesWithTypeInformation,
   node: TSESTree.MemberExpression
 ) {
@@ -26,7 +27,8 @@ function hasTypeAnnotationInAncestors(
 
     return false;
   } else if (node.object.type === AST_NODE_TYPES.MemberExpression) {
-    return hasTypeAnnotationInAncestors(parserServices, node.object);
+    // Check parent node recursively
+    return hasTypeAnnotationInAncestorNode(parserServices, node.object);
   } else {
     return false;
   }
@@ -37,7 +39,9 @@ export const lintMemberExpression = (
   node: TSESTree.MemberExpression
 ) => {
   const parserServices = ESLintUtils.getParserServices(context);
-  if (!node.computed || hasTypeAnnotationInAncestors(parserServices, node)) return;
+  // If it's not a computed property like `foo.bar`, the node is not implicit any since this expression ensures type safety.
+  // If an ancestor node have a type annotation like `(foo as any)['key']['key2']`, the given node is not considered as implicit any.
+  if (!node.computed || hasTypeAnnotationInAncestorNode(parserServices, node)) return;
 
   const nodeType = parserServices.getTypeAtLocation(node);
   const objType = parserServices.getTypeAtLocation(node.object);
@@ -47,6 +51,7 @@ export const lintMemberExpression = (
       node,
       messageId: DETECTED_IMPLICIT_ANY_ERROR_KEY,
       *fix(fixer) {
+        // Adjusting the position to insert "as any"
         const getRangeAdjustment = () => {
           if (!node.optional) return 1;
           if (!node.computed) return 2;
