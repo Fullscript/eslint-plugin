@@ -2,6 +2,7 @@ import type { TSESTree } from "@typescript-eslint/types";
 import { lintTSPropertySignature } from "./lintTSPropertySignature";
 import { lintVariableDeclarator } from "./lintVariableDeclarator";
 import { lintPropertyDefinition } from "./lintPropertyDefinition";
+import { lintObjectExpression } from "./lintObjectExpression";
 import { lintMemberExpression } from "./lintMemberExpression";
 import type { ImplicitAnyContext } from "./type";
 
@@ -38,6 +39,9 @@ export const create = (context: ImplicitAnyContext) => {
     PropertyDefinition: (node: TSESTree.PropertyDefinition) => {
       lintPropertyDefinition(context, node);
     },
+    ObjectExpression: (node: TSESTree.ObjectExpression) => {
+      lintObjectExpression(context, node);
+    },
     MemberExpression: (node: TSESTree.MemberExpression) => {
       lintMemberExpression(context, node);
     },
@@ -47,6 +51,5 @@ export const create = (context: ImplicitAnyContext) => {
     // ArrowFunctionExpression: (node) => {},
     // TSFunctionType: (node) => {},
     // ReturnStatement: (node) => {},
-    // ObjectExpression: (node) => {},
   };
 };
