@@ -4,6 +4,7 @@ import { lintVariableDeclarator } from "./lintVariableDeclarator";
 import { lintPropertyDefinition } from "./lintPropertyDefinition";
 import { lintObjectExpression } from "./lintObjectExpression";
 import { lintMemberExpression } from "./lintMemberExpression";
+import { lintFunctionDeclaration } from "./lintFunctionDeclaration";
 import type { ImplicitAnyContext } from "./type";
 
 const DETECTED_IMPLICIT_ANY_ERROR_KEY = "detectedImplicitAny";
@@ -45,8 +46,10 @@ export const create = (context: ImplicitAnyContext) => {
     MemberExpression: (node: TSESTree.MemberExpression) => {
       lintMemberExpression(context, node);
     },
+    FunctionDeclaration: (node: TSESTree.FunctionDeclaration) => {
+      lintFunctionDeclaration(context, node);
+    },
     // TODO: comming soon
-    // FunctionDeclaration: (node) => {},
     // FunctionExpression: (node) => {},
     // ArrowFunctionExpression: (node) => {},
     // TSFunctionType: (node) => {},
