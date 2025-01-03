@@ -14,6 +14,7 @@ import { noCreateMockInSetFunctions } from "./noCreateMockInSetFunctions";
 import { noInvalidFeature } from "./noInvalidFeature";
 import { aviaryNoClashingBoxColorProps } from "./aviaryRules";
 import { noBannedTranslationWords } from "./noBannedTranslationWords";
+import {noUnderScoreDangleAllowProductable} from "./noUnderScoreDangleAllowProductable";
 
 const rules = {
   "one-translation-import-per-file": oneTranslationImport,
@@ -30,6 +31,7 @@ const rules = {
   "gql-no-manual-hook-declaration": gqlNoManualHookDeclaration,
   "aviary-no-clashing-box-color-props": aviaryNoClashingBoxColorProps,
   "banned-translation-words": noBannedTranslationWords,
+  "no-underscore-dangle-allow-productable": noUnderScoreDangleAllowProductable,
 };
 
 export { rules };
