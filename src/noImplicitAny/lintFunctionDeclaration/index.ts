@@ -1,0 +1,1 @@
+export { lintFunctionDeclaration } from "./lintFunctionDeclaration";

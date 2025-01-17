@@ -19,7 +19,7 @@
     "prettier-diff": "prettier --loglevel 'warn' --check './src/**/*.ts'",
     "build": "swc ./src -d dist",
     "build-watch": "swc ./src -d dist -w",
-    "test": "jest ./src",
+    "test": "jest",
     "type-check": "tsc --noEmit"
   },
   "dependencies": {
