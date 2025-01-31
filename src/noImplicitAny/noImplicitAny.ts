@@ -6,6 +6,7 @@ import { lintObjectExpression } from "./lintObjectExpression";
 import { lintMemberExpression } from "./lintMemberExpression";
 import { lintFunctionDeclaration } from "./lintFunctionDeclaration";
 import { lintTSFunctionType } from "./lintTSFunctionType";
+import { lintFunctionExpression } from "./lintFunctionExpression";
 import type { ImplicitAnyContext } from "./type";
 
 const DETECTED_IMPLICIT_ANY_ERROR_KEY = "detectedImplicitAny";
@@ -53,8 +54,10 @@ export const create = (context: ImplicitAnyContext) => {
     TSFunctionType: (node: TSESTree.TSFunctionType) => {
       lintTSFunctionType(context, node);
     },
+    FunctionExpression: (node: TSESTree.FunctionExpression) => {
+      lintFunctionExpression(context, node);
+    },
     // TODO: comming soon
-    // FunctionExpression: (node) => {},
     // ArrowFunctionExpression: (node) => {},
     // ReturnStatement: (node) => {},
   };
