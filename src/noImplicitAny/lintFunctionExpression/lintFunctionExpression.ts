@@ -17,7 +17,7 @@ export const lintFunctionExpression = (
   context: ImplicitAnyContext,
   node: TSESTree.FunctionExpression
 ) => {
-  let nodeToLint = node;
+  let lintTargetNode = node;
 
   // For react component props
   if (node.parent.type === AST_NODE_TYPES.JSXExpressionContainer) return;
@@ -26,8 +26,8 @@ export const lintFunctionExpression = (
     const type = parserServices.getTypeAtLocation(node.parent.callee);
 
     if (type.symbol && type.symbol.valueDeclaration) {
-      nodeToLint = parserServices.tsNodeToESTreeNodeMap.get(type.symbol.valueDeclaration);
-      if (!nodeToLint) return;
+      lintTargetNode = parserServices.tsNodeToESTreeNodeMap.get(type.symbol.valueDeclaration);
+      if (!lintTargetNode) return;
     } else if (node.parent.callee.type === AST_NODE_TYPES.Identifier) {
       return;
     }
@@ -40,13 +40,13 @@ export const lintFunctionExpression = (
       const parserServices = ESLintUtils.getParserServices(context);
       const type = parserServices.getTypeAtLocation(node.parent.parent.parent.callee);
       if (type.symbol && type.symbol.valueDeclaration) {
-        nodeToLint = parserServices.tsNodeToESTreeNodeMap.get(type.symbol.valueDeclaration);
-        if (!nodeToLint) return;
+        lintTargetNode = parserServices.tsNodeToESTreeNodeMap.get(type.symbol.valueDeclaration);
+        if (!lintTargetNode) return;
       }
     }
   }
 
-  nodeToLint.params.forEach(arg => {
+  lintTargetNode.params.forEach(arg => {
     lintFunctionArgument(context, arg);
   });
 };
