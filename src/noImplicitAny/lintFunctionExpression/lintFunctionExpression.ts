@@ -2,51 +2,67 @@ import { type TSESTree, AST_NODE_TYPES } from "@typescript-eslint/types";
 import { ESLintUtils } from "@typescript-eslint/utils";
 import type { ImplicitAnyContext } from "../type";
 import { lintFunctionArgument } from "../lintFunctionUtils";
-
-const hasObjectTypeAnnotationInAncestors = (node: TSESTree.Node) => {
-  if (node.parent === null) {
-    return false;
-  } else if (node.parent.type === AST_NODE_TYPES.VariableDeclarator) {
-    return node.parent.id.typeAnnotation ? true : false;
-  }
-
-  return hasObjectTypeAnnotationInAncestors(node.parent);
-};
+import { findNode } from "../../utils";
 
 export const lintFunctionExpression = (
   context: ImplicitAnyContext,
   node: TSESTree.FunctionExpression
 ) => {
-  let nodeToLint = node;
-
-  // For react component props
+  // Arguments of FunctionExpression in JSXExpressionContainer will not be linted since they're supposed to be linted in the Component props definition
+  // Example:
+  //   const TestComponent = ({ onClick }) => <button onClick={onClick} />;
+  //   <TestComponent onClick={function (arg) {}} />;
+  //   In this case, "arg" is implicit any but it should have type defenition when `onClick` is defined in `TestComponent` props.
   if (node.parent.type === AST_NODE_TYPES.JSXExpressionContainer) return;
+
+  // When a function is in CallExpression
+  // ex) array.forEach(function (arg) {});
   if (node.parent.type === AST_NODE_TYPES.CallExpression) {
     const parserServices = ESLintUtils.getParserServices(context);
     const type = parserServices.getTypeAtLocation(node.parent.callee);
 
-    if (type.symbol && type.symbol.valueDeclaration) {
-      nodeToLint = parserServices.tsNodeToESTreeNodeMap.get(type.symbol.valueDeclaration);
-      if (!nodeToLint) return;
-    } else if (node.parent.callee.type === AST_NODE_TYPES.Identifier) {
-      return;
-    }
+    // a callee which has value declaration should be linted in VariableDeclarator
+    if (type.symbol && type.symbol.valueDeclaration) return;
+
+    // When a callee is defined as FunctionDeclaration, it should be linted in FunctionDeclaration
+    // Example:
+    //   function fn(callback) { callback(); }
+    //   fn(function (arg) {});
+    if (type.symbol && node.parent.callee.type === AST_NODE_TYPES.Identifier) return;
   }
+
+  // When a function is in a property of an object
+  // Example: const obj = { key: function (arg) {} };
   if (node.parent.type === AST_NODE_TYPES.Property) {
-    const hasObjectAnnotation = hasObjectTypeAnnotationInAncestors(node.parent.parent);
-    if (hasObjectAnnotation) {
-      return;
-    } else if (node.parent.parent.parent.type === AST_NODE_TYPES.CallExpression) {
+    // Traverse the AST to get type annotation
+    // if it has type annotation, it doesn't have to be linted
+    // Example1: const obj: { key: (arg: string) => void } = { key: function (arg) {} };
+    // Example2: const obj: any = { key: function (arg) {} };
+    const variableDclaratorNode: TSESTree.VariableDeclarator | null = findNode(
+      [AST_NODE_TYPES.VariableDeclarator],
+      node.parent
+    );
+    if (variableDclaratorNode && variableDclaratorNode.id.typeAnnotation) return;
+
+    const callExpressionNode: TSESTree.CallExpression | null = findNode(
+      [AST_NODE_TYPES.CallExpression],
+      node.parent.parent.parent
+    );
+    if (callExpressionNode) {
       const parserServices = ESLintUtils.getParserServices(context);
-      const type = parserServices.getTypeAtLocation(node.parent.parent.parent.callee);
-      if (type.symbol && type.symbol.valueDeclaration) {
-        nodeToLint = parserServices.tsNodeToESTreeNodeMap.get(type.symbol.valueDeclaration);
-        if (!nodeToLint) return;
-      }
+      const type = parserServices.getTypeAtLocation(callExpressionNode.callee);
+
+      // a callee which has value declaration should be linted in VariableDeclarator
+      if (type.symbol && type.symbol.valueDeclaration) return;
+      // When a callee is defined as FunctionDeclaration, it should be linted in FunctionDeclaration
+      // Example:
+      //   function fn(obj) {}
+      //   fn({ key: function (arg) {} });
+      if (type.symbol && callExpressionNode.callee.type === AST_NODE_TYPES.Identifier) return;
     }
   }
 
-  nodeToLint.params.forEach(arg => {
+  node.params.forEach(arg => {
     lintFunctionArgument(context, arg);
   });
 };

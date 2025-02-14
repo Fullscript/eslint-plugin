@@ -37,6 +37,7 @@ const findByPaths = (paths, tree) => {
 
 export {
   findByPaths,
+  findNode,
   isArrayExpression,
   isAwaitExpression,
   isCalleName,
