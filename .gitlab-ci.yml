@@ -3,11 +3,12 @@ stages:
   - test
   - build
 
-build-job:
-  stage: build
+lint-test-job:
+  stage: lint
   script:
-    - echo "Compiling the code..."
-    - echo "Compile complete."
+    - echo "Linting code... This will take about 10 seconds."
+    - sleep 10
+    - echo "No lint issues found."
 
 unit-test-job:
   stage: test
@@ -16,9 +17,11 @@ unit-test-job:
     - sleep 60
     - echo "Code coverage is 90%"
 
-lint-test-job:
-  stage: test
+build-job:
+  stage: build
   script:
-    - echo "Linting code... This will take about 10 seconds."
-    - sleep 10
-    - echo "No lint issues found."
+    - echo "Compiling the code..."
+    - echo "Compile complete."
+
+
+
