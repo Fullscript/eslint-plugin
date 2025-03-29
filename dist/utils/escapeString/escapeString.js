@@ -6,4 +6,4 @@ Object.defineProperty(exports, "escapeString", {
     enumerable: true,
     get: ()=>escapeString
 });
-const escapeString = (string)=>string.replace(/[-/\\^$*+?.()|[\]{}]/g, '\\$&');
+const escapeString = (string)=>string.replace(/[-/\\^$*+?.()|[\]{}]/g, "\\$&");
