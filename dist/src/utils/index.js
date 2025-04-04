@@ -1,0 +1,21 @@
+"use strict";
+Object.defineProperty(exports, "__esModule", {
+    value: true
+});
+_export_star(require("./isTranslationSource"), exports);
+_export_star(require("./relativePathToFile"), exports);
+_export_star(require("./ast"), exports);
+_export_star(require("./compilerOptions"), exports);
+function _export_star(from, to) {
+    Object.keys(from).forEach(function(k) {
+        if (k !== "default" && !Object.prototype.hasOwnProperty.call(to, k)) {
+            Object.defineProperty(to, k, {
+                enumerable: true,
+                get: function() {
+                    return from[k];
+                }
+            });
+        }
+    });
+    return from;
+}
