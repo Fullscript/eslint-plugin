@@ -17,11 +17,6 @@ export const meta = {
     fixable: null,
   };
 
-// 1. Prevent let declarations in the global scope of test files
-// 2. Prevent const declarations of objects and arrays in the global scope of test files
-// 3. Allow const declarations of primitive values (strings, numbers, booleans) in the global scope
-// 4. Allow both let and const declarations inside functions, classes, or blocks
-
 const isTestFile = (filename: string) => filename.endsWith(".spec.tsx")
 
 export const create = (context: NoGlobalVariablesInTestsContext) => {
@@ -39,9 +34,9 @@ export const create = (context: NoGlobalVariablesInTestsContext) => {
                 });
             } else if (node.kind === "const") {
                 const declaration = node.declarations[0]
-                const isObjectOrArray = declaration.init && (declaration.init.type === "ObjectExpression" || declaration.init.type === "ArrayExpression");
+                const isTypeObjectOrArray = declaration.init && (declaration.init.type === "ObjectExpression" || declaration.init.type === "ArrayExpression");
 
-                if (isObjectOrArray) {
+                if (isTypeObjectOrArray) {
                     context.report({
                         node,
                         messageId: NO_GLOBAL_OBJECT_IN_TESTS_ERROR_KEY,
