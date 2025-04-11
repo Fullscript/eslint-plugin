@@ -52,6 +52,25 @@ AST Explorer allows you to play around with it: https://astexplorer.net
 3. In VS Code, press `Ctrl + Shift + P` and then type “Attach”. Select the “Debug: Attach to Node Process” option.
 4. You should now see the debugger running, and can move forward until you reach the trigger you set.
 
+### Automated Testing
+
+This repository provides two ways to test pieces of code and custom rules:
+
+- Unit tests
+- Integration tests
+
+Unit tests are used to test individual pieces of code (especially functions in this repository) that are isolated and don't need special setup ([Example](https://git.fullscript.io/developers/fullscript-eslint-plugin/-/blob/main/src/utils/escapeString/escapeString.spec.ts)).
+
+On the other hand, Integration tests provide a way to test custom rules themselves ([Example](https://git.fullscript.io/developers/fullscript-eslint-plugin/-/blob/main/src/oneTranslationImport/oneTranslationImport.spec.ts)). Integration tests are more comprehensive than Unit tests, offering several benefits:
+
+- Allow us to test custom rules without needing to use `yarn link`, or waiting for a new version release
+- Be able to be incorporated into our CI system to ensure new changes don't break anything
+- Give us clear visibility into what kind of code is allowed or disallowed by the rules
+
+Adding Integration tests to custom rules is highly recommended alongside Unit tests to gain these benefits.
+
+We use [rule-tester](https://typescript-eslint.io/packages/rule-tester/) library to write Integration tests because this library provides a clear syntax, better types, and features that make writing tests easier.
+
 ### Useful Resources:
 
 - ESLint official documentation: https://eslint.org/docs/latest/extend/custom-rules
