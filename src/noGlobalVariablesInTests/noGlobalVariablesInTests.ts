@@ -7,7 +7,6 @@ export const meta = {
     docs: {
       description: "Prevents variables in tests from being declared in the global scope",
       category: "no-global-variables-in-tests",
-      recommended: false,
     },
     messages: {
       [NO_GLOBAL_LET_IN_TESTS_ERROR_KEY]: "'let' declarations are not allowed in the global scope of test files. Use 'const' or move the declaration inside a function/block.",
