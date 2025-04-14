@@ -23,7 +23,6 @@ export const create = (context: NoGlobalVariablesInTestsContext) => {
 
     return {
         VariableDeclaration: (node: TSESTree.VariableDeclaration) => {
-            // Check if the variable is in a describe block within the test file
             if (node.parent.type === "BlockStatement") return;
 
             if (node.kind === "let") {
