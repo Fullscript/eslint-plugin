@@ -1,6 +1,6 @@
 {
   "name": "@fullscript/eslint-plugin",
-  "version": "3.0.0",
+  "version": "3.0.1",
   "description": "Fullscript custom eslint rules",
   "main": "dist/index.js",
   "contributors": [
