@@ -19,7 +19,8 @@ _export(exports, {
     isLiteral: ()=>isLiteral,
     isObjectExpression: ()=>isObjectExpression,
     isProperty: ()=>isProperty,
-    isSpreadElement: ()=>isSpreadElement
+    isSpreadElement: ()=>isSpreadElement,
+    isNullOrUndefinedOrVoid: ()=>isNullOrUndefinedOrVoid
 });
 const isType = (node, type)=>{
     return (node === null || node === void 0 ? void 0 : node.type) === type;
@@ -29,8 +30,20 @@ const isObjectExpression = (node)=>isType(node, "ObjectExpression");
 const isArrayExpression = (node)=>isType(node, "ArrayExpression");
 const isSpreadElement = (node)=>isType(node, "SpreadElement");
 const isLiteral = (node)=>isType(node, "Literal");
+const isIdentifier = (node)=>isType(node, "Identifier");
+const isUnaryExpression = (node)=>isType(node, "UnaryExpression");
 const isAwaitExpression = (node)=>isType(node, "AwaitExpression");
 const isProperty = (node)=>isType(node, "Property");
+const isNull = (node)=>{
+    return isLiteral(node) && (node === null || node === void 0 ? void 0 : node.value) === null;
+};
+const isUndefined = (node)=>{
+    return isIdentifier(node) && (node === null || node === void 0 ? void 0 : node.name) === "undefined";
+};
+const isVoid = (node)=>{
+    return isUnaryExpression(node) && (node === null || node === void 0 ? void 0 : node.operator) === "void";
+};
+const isNullOrUndefinedOrVoid = (node)=>isNull(node) || isUndefined(node) || isVoid(node);
 // calee
 const isCalleName = (node, name)=>{
     var _node_callee;
