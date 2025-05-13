@@ -30,7 +30,7 @@ const isEmpty = (arr)=>Array.isArray(arr) && arr.length === 0;
 const buildErrorMessage = (word)=>`Word \`${word}\` is not allowed to be used directly in translations.`;
 const searchForBannedWords = (bannedWords, value)=>{
     return bannedWords.reduce((acc, word)=>{
-        const pattern = new RegExp('\\b' + (0, _escapeString.escapeString)(word) + '\\b', 'i');
+        const pattern = new RegExp("\\b" + (0, _escapeString.escapeString)(word) + "\\b", "i");
         if (pattern.test(value)) {
             const match = value.match(pattern);
             if (match) {
@@ -58,8 +58,8 @@ const create = (context)=>{
     const { bannedWords =[]  } = ((_context_options = context.options) === null || _context_options === void 0 ? void 0 : _context_options[0]) || {};
     return {
         Literal (node) {
-            if (typeof node.value !== 'string') return;
-            if (node.parent.type !== 'Property') return;
+            if (typeof node.value !== "string") return;
+            if (node.parent.type !== "Property") return;
             const result = searchForBannedWords(bannedWords, node.value);
             if (!isEmpty(result)) {
                 context.report({

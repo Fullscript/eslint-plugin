@@ -2,9 +2,6 @@
 Object.defineProperty(exports, "__esModule", {
     value: true
 });
-_exportStar(require("./isTranslationSource"), exports);
-_exportStar(require("./relativePathToFile"), exports);
-_exportStar(require("./ast"), exports);
 _exportStar(require("./compilerOptions"), exports);
 function _exportStar(from, to) {
     Object.keys(from).forEach(function(k) {
