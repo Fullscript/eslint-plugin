@@ -10,17 +10,22 @@ function _export(target, all) {
 }
 _export(exports, {
     meta: ()=>meta,
-    create: ()=>create
+    create: ()=>create,
+    DUPLICATED_IMPORT_ERROR_KEY: ()=>DUPLICATED_IMPORT_ERROR_KEY
 });
 const _utils = require("../utils");
+const DUPLICATED_IMPORT_ERROR_KEY = "duplicatedImport";
 const meta = {
     type: "problem",
     docs: {
         description: "Enforces that there's just one translation import per file",
-        category: "translation-import",
-        recommended: false
+        category: "translation-import"
     },
-    fixable: null
+    fixable: null,
+    schema: [],
+    messages: {
+        [DUPLICATED_IMPORT_ERROR_KEY]: "There's already a translation import in this file, only one import per file is allowed."
+    }
 };
 const create = (context)=>{
     const translationImportNodes = [];
@@ -33,7 +38,7 @@ const create = (context)=>{
                 } else {
                     context.report({
                         node: node,
-                        message: "There's already a translation import in this file, only one import per file is allowed."
+                        messageId: DUPLICATED_IMPORT_ERROR_KEY
                     });
                 }
             }
