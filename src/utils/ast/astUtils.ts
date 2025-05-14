@@ -35,6 +35,35 @@ const findByPaths = (paths, tree) => {
   return null;
 };
 
+/**
+ * Checks if a JSX element has any non-whitespace text children
+ * @param element The JSX element to check
+ * @returns true if the element has any non-whitespace text children
+ */
+const hasNonEmptyTextChildren = (element) => {
+  return element.children.some(child => {
+    if (child.type === 'JSXText' && child.value.trim() !== '') {
+      return true;
+    }
+    return false;
+  });
+};
+
+/**
+ * Gets the component name from a JSX element for use in error messages
+ * @param element The JSX element to extract the name from
+ * @returns The component name, or 'component' if name cannot be determined
+ */
+const getComponentName = (element) => {
+  const openingElement = element.openingElement;
+  if (openingElement && openingElement.name) {
+    if (openingElement.name.type === 'JSXIdentifier') {
+      return openingElement.name.name;
+    }
+  }
+  return 'component';
+};
+
 export {
   findByPaths,
   isArrayExpression,
@@ -47,4 +76,6 @@ export {
   isProperty,
   isSpreadElement,
   isNullOrUndefinedOrVoid,
+  hasNonEmptyTextChildren,
+  getComponentName,
 };
