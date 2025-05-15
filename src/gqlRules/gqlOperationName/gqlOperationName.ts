@@ -55,14 +55,7 @@ const create = context => {
     const pathToFile = relativePathToFile(context);
     const relativeJsPath = pathToFile.replace(sourcePath, "");
 
-    let namespace = null;
-    const namespaceKeys = Object.keys(namespaceOperationPrefix);
-    for (const key of namespaceKeys) {
-      if (relativeJsPath.startsWith(key)) {
-        namespace = key;
-        break;
-      }
-    }
+    const namespace = Object.keys(namespaceOperationPrefix).find((namespaceOperationKey)=>relativeJsPath.startsWith(namespaceOperationKey));
 
     return { namespace, operationPrefix: namespaceOperationPrefix[namespace] };
   };

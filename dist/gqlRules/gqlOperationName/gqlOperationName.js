@@ -61,14 +61,7 @@ const create = (context)=>{
     const getNamespaceAndPrefix = ()=>{
         const pathToFile = (0, _utils1.relativePathToFile)(context);
         const relativeJsPath = pathToFile.replace(sourcePath, "");
-        let namespace = null;
-        const namespaceKeys = Object.keys(namespaceOperationPrefix);
-        for (const key of namespaceKeys){
-            if (relativeJsPath.startsWith(key)) {
-                namespace = key;
-                break;
-            }
-        }
+        const namespace = Object.keys(namespaceOperationPrefix).find((namespaceOperationKey)=>relativeJsPath.startsWith(namespaceOperationKey));
         return {
             namespace,
             operationPrefix: namespaceOperationPrefix[namespace]
