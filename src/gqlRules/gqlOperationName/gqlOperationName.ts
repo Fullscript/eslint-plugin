@@ -113,11 +113,9 @@ const create = context => {
   const OperationDefinition = node => {
     if (!isGraphQLFile) return;
 
-    // For GraphQL files, we need to extract the operation from the document
     const sourceCode = context.getSourceCode();
     const fileContent = sourceCode.getText();
 
-    // Find the operation type and name
   const queryMatch = fileContent.match(/query\s+(\w+)/);
     const mutationMatch = fileContent.match(/mutation\s+(\w+)/);
 
