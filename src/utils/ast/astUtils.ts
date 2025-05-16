@@ -60,36 +60,37 @@ const getComponentName = (element) => {
   if (openingElement && openingElement.name) {
     const { name } = openingElement;
     
-    // Handle standard identifiers (e.g., <Link>)
+    // Handle standard identifiers
+    // Example: <Link> - returns 'Link'
     if (name.type === 'JSXIdentifier') {
       return name.name;
     }
     
-    // Handle member expressions (e.g., <React.Fragment>)
+    // Handle member expressions
+    // Example: <React.Fragment> - returns 'Fragment'
+    // Example: <Component.withHOC> - returns 'Component'
     if (name.type === 'JSXMemberExpression') {
-      // For member expressions, use the property part (e.g., "Fragment" from React.Fragment)
+      // For member expressions, use the property part
       if (name.property && name.property.type === 'JSXIdentifier') {
         return name.property.name;
       }
       // If we can't extract the property name, try the object name
-      // Example: <React.Fragment> should return 'Fragment'
       if (name.object && name.object.type === 'JSXIdentifier') {
         return name.object.name;
       }
     }
     
-    // Handle namespaced names (e.g., <svg:path>) - returns 'path'
+    // Handle namespaced names
+    // Example: <svg:path> - returns 'path'
     if (name.type === 'JSXNamespacedName') {
       if (name.name && name.name.type === 'JSXIdentifier') {
         return name.name.name;
       }
     }
     
-    // Default case - return 'Unknown' if we couldn't determine the name
     return 'Unknown';
   }
   
-  // Default case - return 'Unknown' if we couldn't determine the name
   return 'Unknown';
 };
 

@@ -1,8 +1,7 @@
 import { TSESLint, TSESTree } from '@typescript-eslint/utils';
 import { getComponentName, hasNonEmptyTextChildren } from '../utils/ast/astUtils';
 
-// Define message IDs for the rule
-type MessageIds = 
+type MessageIds =
   | 'useVariableReference'
   | 'preferComponentsProp'
   | 'noChildrenWithComponentsProp'
@@ -14,8 +13,8 @@ export const meta: TSESLint.RuleMetaData<MessageIds, []> = {
     description: "Enforces using components prop with Trans instead of embedding elements and ensures i18nKey is a variable reference",
     recommended: 'recommended',
   },
-  fixable: null, // We'll start without auto-fix
-  schema: [], // no options
+  fixable: null,
+  schema: [],
   messages: {
     useVariableReference: "i18nKey prop should use a variable reference like {l.namespace.key} instead of a string literal.",
     preferComponentsProp: "Prefer using the 'components' prop with Trans instead of embedding elements directly. This avoids duplication and simplifies maintenance.",
@@ -24,7 +23,6 @@ export const meta: TSESLint.RuleMetaData<MessageIds, []> = {
   }
 };
 
-// Default options for the rule
 export const defaultOptions: [] = [];
 
 /**
@@ -41,8 +39,7 @@ export const create: TSESLint.RuleModule<MessageIds, []>['create'] = (context: T
         return; // Not a Trans component, ignore
       }
 
-      // First, let's check if there's an import statement for Trans from another library
-      const sourceCode = context.getSourceCode();
+      const { sourceCode } = context;
       const program = sourceCode.ast.body;
       
       // Check if there are any import statements that import Trans from a non-react-i18next source
@@ -154,21 +151,19 @@ export const create: TSESLint.RuleModule<MessageIds, []>['create'] = (context: T
           node,
           messageId: 'noChildrenWithComponentsProp'
         });
-        return; // Stop after reporting this error
+        return;
       }
       
       // Priority 2: Components with content
       if (componentsWithContentProps.length > 0) {
-        const { prop, name, element } = componentsWithContentProps[0];
+        const { prop, name } = componentsWithContentProps[0];
         
         context.report({
           node: prop,
           messageId: 'componentsWithContent',
-          data: {
-            name: name // Use the component name directly without special casing
-          }
+          data: { name }
         });
-        return; // Stop after reporting this error
+        return;
       }
       
       // Priority 3: i18nKey literal
@@ -177,7 +172,7 @@ export const create: TSESLint.RuleModule<MessageIds, []>['create'] = (context: T
           node: i18nKeyProp,
           messageId: 'useVariableReference'
         });
-        return; // Stop after reporting this error
+        return;
       }
       
       // Priority 4: Check for i18nKey + embedded elements instead of components
