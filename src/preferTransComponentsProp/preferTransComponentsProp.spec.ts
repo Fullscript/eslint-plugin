@@ -1,5 +1,4 @@
-import { RuleTester } from "eslint";
-import type { Rule } from "eslint";
+import { RuleTester } from '@typescript-eslint/rule-tester';
 import * as rule from "./preferTransComponentsProp";
 
 const ruleTester = new RuleTester({
@@ -13,15 +12,15 @@ const ruleTester = new RuleTester({
   },
 });
 
-ruleTester.run("prefer-trans-components-prop", rule as Rule.RuleModule, {
+ruleTester.run("prefer-trans-components-prop", rule, {
   valid: [
-    // Valid case: using components prop with Trans
+    // Valid case: Trans with i18nKey as variable reference and components prop
     {
       code: `
         import { Trans } from 'react-i18next';
         const Component = () => (
           <Trans 
-            i18nKey="namespace.key"
+            i18nKey={l.credentials.Empty.Description}
             components={{
               link: <Link href="/support" />
             }}
@@ -29,7 +28,7 @@ ruleTester.run("prefer-trans-components-prop", rule as Rule.RuleModule, {
         );
       `,
     },
-    // Valid case: Trans without i18nKey
+    // Valid case: Trans without i18nKey (can have plain text)
     {
       code: `
         import { Trans } from 'react-i18next';
@@ -38,7 +37,7 @@ ruleTester.run("prefer-trans-components-prop", rule as Rule.RuleModule, {
         );
       `,
     },
-    // Valid case: Trans from different library
+    // Valid case: Trans from different library (can use string literals)
     {
       code: `
         import { Trans } from 'other-library';
@@ -47,29 +46,117 @@ ruleTester.run("prefer-trans-components-prop", rule as Rule.RuleModule, {
         );
       `,
     },
-    // Valid case: Trans with empty children
+    // Valid case: Trans with empty children and variable i18nKey
     {
       code: `
         import { Trans } from 'react-i18next';
         const Component = () => (
-          <Trans i18nKey="namespace.key"></Trans>
+          <Trans i18nKey={l.namespace.key}></Trans>
         );
       `,
     },
-    // Valid case: Trans with only whitespace children
+    // Valid case: Trans with only whitespace children and variable i18nKey
     {
       code: `
         import { Trans } from 'react-i18next';
         const Component = () => (
-          <Trans i18nKey="namespace.key">
+          <Trans i18nKey={l.namespace.key}>
             {/* This is just whitespace */}
           </Trans>
         );
       `,
     },
+    // Valid case: Trans with i18nKey as a MemberExpression
+    {
+      code: `
+        import { Trans } from 'react-i18next';
+        const Component = () => (
+          <Trans 
+            i18nKey={translations.common.someKey}
+            components={{
+              link: <Link href="/support" />
+            }}
+          />
+        );
+      `,
+    },
+    // Valid case: Trans with i18nKey as a template literal with variables
+    {
+      code: `
+        import { Trans } from 'react-i18next';
+        const Component = () => (
+          <Trans 
+            i18nKey={\`\${namespace}.\${key}\`}
+            components={{
+              link: <Link href="/support" />
+            }}
+          />
+        );
+      `,
+    },
+    // Valid case: Self-closing Trans with variable i18nKey
+    {
+      code: `
+        import { Trans } from 'react-i18next';
+        const Component = () => (
+          <Trans i18nKey={l.namespace.key} />
+        );
+      `,
+    },
   ],
   invalid: [
-    // Invalid case: Trans with i18nKey and embedded elements
+    // Invalid case: Trans with i18nKey as string literal 
+    {
+      code: `
+        import { Trans } from 'react-i18next';
+        const Component = () => (
+          <Trans 
+            i18nKey="paymentSettings:payoutsPausedVerification"
+            components={{
+              link: <Link href="/support" />
+            }}
+          />
+        );
+      `,
+      errors: [
+        {
+          messageId: "useVariableReference"
+        },
+      ],
+    },
+    // Invalid case: Trans with i18nKey as string literal and plain text content
+    {
+      code: `
+        import { Trans } from 'react-i18next';
+        const Component = () => (
+          <Trans i18nKey="namespace.key">
+            Some text content
+          </Trans>
+        );
+      `,
+      errors: [
+        {
+          messageId: "useVariableReference"
+        },
+      ],
+    },
+    // Invalid case: Trans with variable i18nKey and plain text content (should not have text content)
+    {
+      code: `
+        import { Trans } from 'react-i18next';
+        const Component = () => (
+          <Trans i18nKey={l.namespace.key}>
+            Some text without components
+          </Trans>
+        );
+      `,
+      errors: [
+        {
+          messageId: "preferComponentsProp"
+        },
+      ],
+    },
+    // Invalid case: Trans with i18nKey as string literal and embedded elements
     {
       code: `
         import { Trans } from 'react-i18next';
@@ -81,12 +168,11 @@ ruleTester.run("prefer-trans-components-prop", rule as Rule.RuleModule, {
       `,
       errors: [
         {
-          message:
-            "Prefer using the 'components' prop with Trans instead of embedding elements directly. This avoids duplication and simplifies maintenance.",
+          messageId: "useVariableReference"
         },
       ],
     },
-    // Invalid case: Trans with i18nKey and mixed content
+    // Invalid case: Trans with i18nKey as string literal and mixed content
     {
       code: `
         import { Trans } from 'react-i18next';
@@ -100,18 +186,33 @@ ruleTester.run("prefer-trans-components-prop", rule as Rule.RuleModule, {
       `,
       errors: [
         {
-          message:
-            "Prefer using the 'components' prop with Trans instead of embedding elements directly. This avoids duplication and simplifies maintenance.",
+          messageId: "useVariableReference"
         },
       ],
     },
-    // Invalid case: Trans with both components prop AND content (which is redundant)
+    // Invalid case: Trans with variable i18nKey but not using components prop for embedded elements
+    {
+      code: `
+        import { Trans } from 'react-i18next';
+        const Component = () => (
+          <Trans i18nKey={l.namespace.key}>
+            Text with embedded <Link href="/support">link</Link> element
+          </Trans>
+        );
+      `,
+      errors: [
+        {
+          messageId: "preferComponentsProp"
+        },
+      ],
+    },
+    // Invalid case: Trans with both components prop AND children (which is redundant)
     {
       code: `
         import { Trans } from 'react-i18next';
         const Component = () => (
           <Trans 
-            i18nKey="namespace.key"
+            i18nKey={l.namespace.key}
             components={{
               learnMore: <Link href="/support">Learn more</Link>
             }}
@@ -122,8 +223,7 @@ ruleTester.run("prefer-trans-components-prop", rule as Rule.RuleModule, {
       `,
       errors: [
         {
-          message:
-            "When using the 'components' prop with Trans, you should not include children. The component should be self-closing.",
+          messageId: "noChildrenWithComponentsProp"
         },
       ],
     },
@@ -133,7 +233,7 @@ ruleTester.run("prefer-trans-components-prop", rule as Rule.RuleModule, {
         import { Trans } from 'react-i18next';
         const Component = () => (
           <Trans 
-            i18nKey="namespace.key"
+            i18nKey={l.namespace.key}
             components={{
               learnMore: <Link href="/support">Learn more</Link> // Should be self-closing
             }}
@@ -142,8 +242,8 @@ ruleTester.run("prefer-trans-components-prop", rule as Rule.RuleModule, {
       `,
       errors: [
         {
-          message:
-            "Components in the 'components' prop should be self-closing tags without text content. Found non-empty content in <Link>.",
+          messageId: "componentsWithContent",
+          data: { name: "Link" }
         },
       ],
     },

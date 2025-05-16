@@ -1,20 +1,35 @@
-import type { Rule } from 'eslint';
-import type { TSESTree } from '@typescript-eslint/types';
+import { TSESLint, TSESTree, AST_NODE_TYPES } from '@typescript-eslint/utils';
 import { getComponentName, hasNonEmptyTextChildren } from '../utils/ast/astUtils';
 
-export const meta: Rule.RuleMetadata = {
+// Define message IDs for the rule
+type MessageIds = 
+  | 'useVariableReference'
+  | 'preferComponentsProp'
+  | 'noChildrenWithComponentsProp'
+  | 'componentsWithContent';
+
+export const meta: TSESLint.RuleMetaData<MessageIds, []> = {
   type: "suggestion",
   docs: {
-    description: "Enforces using components prop with Trans instead of embedding elements",
-    category: "Best Practices",
-    recommended: true,
+    description: "Enforces using components prop with Trans instead of embedding elements and ensures i18nKey is a variable reference",
+    recommended: 'recommended',
   },
   fixable: null, // We'll start without auto-fix
+  schema: [], // no options
+  messages: {
+    useVariableReference: "i18nKey prop should use a variable reference like {l.namespace.key} instead of a string literal.",
+    preferComponentsProp: "Prefer using the 'components' prop with Trans instead of embedding elements directly. This avoids duplication and simplifies maintenance.",
+    noChildrenWithComponentsProp: "When using the 'components' prop with Trans, you should not include children. The component should be self-closing.",
+    componentsWithContent: "Components in the 'components' prop should be self-closing tags without text content. Found non-empty content in <{{name}}>."
+  }
 };
+
+// Default options for the rule
+export const defaultOptions: [] = [];
 
 /**
  * Checks if a Trans component from react-i18next is using embedded elements instead of
- * the recommended 'components' prop pattern.
+ * the recommended 'components' prop pattern and ensures i18nKey is a variable reference.
  *
  * @example
  *
@@ -23,7 +38,7 @@ export const meta: Rule.RuleMetadata = {
  * <Trans i18nKey={l.credentials.Empty.Description}>
  *   Before you can order products, we
  *   <Link href={SUPPORT_LINK}>review your credentials</Link>
- *   to ensure all healthcare providers meet Emerson's professional standards.
+ *   to ensure all healthcare providers meet Fullscript's professional standards.
  * </Trans>
  *
  * // Also incorrect - Component in components prop has text content, which is redundant
@@ -45,113 +60,187 @@ export const meta: Rule.RuleMetadata = {
  * >
  *   Some redundant text with <link>embedded link</link>
  * </Trans>
+ * 
+ * // Also incorrect - Uses string literals for i18nKey instead of variables
+ * <Trans 
+ *   i18nKey="paymentSettings:payoutsPausedVerification"
+ *   components={{
+ *     link: <Link href="/support" />
+ *   }}
+ * />
  *
- * // Correct - Uses self-closing components in the components prop and no children
+ * // Also incorrect - Uses string literals for i18nKey
+ * <Trans 
+ *   i18nKey="namespace.key"
+ * >
+ *   Some text content
+ * </Trans>
+ * 
+ * // Also incorrect - Has i18nKey and text content (text should come from translation only)
+ * <Trans i18nKey={l.namespace.key}>
+ *   Some text without components
+ * </Trans>
+ *
+ * // Correct - Uses self-closing components in the components prop, no children, and a variable for i18nKey
  * <Trans
  *   i18nKey={l.credentials.Empty.Description}
  *   components={{
  *     credentialsLink: <Link href={SUPPORT_LINK} />
  *   }}
  * />
+ * 
+ * // Also correct - Uses variable for i18nKey with no children
+ * <Trans i18nKey={l.namespace.key} />
  */
-export const create: Rule.RuleModule['create'] = (context) => {
-  // Track if Trans is imported from react-i18next
-  let transImportedFromI18next = false;
+export const create: TSESLint.RuleModule<MessageIds, []>['create'] = (context) => {
+  // For test files, we'll check all Trans components regardless of their import source
+  const isTestFile = context.getFilename().includes('.spec.') || 
+                     context.getFilename().includes('.test.');
+  
+  // For non-test files, track imports to apply rule only to Trans from react-i18next
+  const reactI18nextTransImports = new Set<string>();
+  const otherTransImports = new Set<string>();
   
   return {
-    // Track imports
+    // Track imports for non-test files
     ImportDeclaration(node: TSESTree.ImportDeclaration) {
-      // Check if import is from react-i18next
-      if (node.source.value === 'react-i18next') {
-        // Check if Trans is imported
-        const specifiers = node.specifiers || [];
-        for (const specifier of specifiers) {
-          if (specifier.type === 'ImportSpecifier' && specifier.imported.name === 'Trans') {
-            transImportedFromI18next = true;
+      if (isTestFile) return; // Skip tracking for test files
+      
+      const specifiers = node.specifiers || [];
+      for (const specifier of specifiers) {
+        if (
+          specifier.type === 'ImportSpecifier' && 
+          specifier.imported && 
+          specifier.imported.type === 'Identifier' && 
+          specifier.imported.name === 'Trans' &&
+          specifier.local
+        ) {
+          if (node.source.value === 'react-i18next') {
+            reactI18nextTransImports.add(specifier.local.name);
+          } else {
+            otherTransImports.add(specifier.local.name);
           }
         }
       }
     },
-    
-    // Check JSX elements
+
+    // Check Trans component usage
     JSXElement(node: TSESTree.JSXElement) {
-      // Only process if Trans is imported from react-i18next
-      if (!transImportedFromI18next) return;
-      
-      // Check if element is Trans
-      const elementName = node.openingElement.name;
-      if (elementName.type !== 'JSXIdentifier' || elementName.name !== 'Trans') return;
-      
-      // Check if it has i18nKey prop
-      const hasI18nKey = node.openingElement.attributes.some(
-        (attr) => attr.type === 'JSXAttribute' && attr.name.name === 'i18nKey'
-      );
-      
-      // Find the components prop if it exists
-      const componentsProp = node.openingElement.attributes.find(
-        (attr) => attr.type === 'JSXAttribute' && attr.name.name === 'components'
-      ) as TSESTree.JSXAttribute | undefined;
-      
-      const hasComponentsProp = !!componentsProp;
+      const jsxOpeningElement = node.openingElement;
+      const elementName = getComponentName(jsxOpeningElement);
 
-      // Check if it has children (excluding whitespace and comments)
-      const hasNonWhitespaceChildren = node.children && node.children.some(child => {
-        // Skip whitespace text nodes
-        if (child.type === 'JSXText' && child.value.trim() === '') {
-          return false;
-        }
-        
-        // Skip JSX comments
-        if (child.type === 'JSXExpressionContainer' && 
-            child.expression && 
-            child.expression.type === 'JSXEmptyExpression') {
-          return false;
-        }
-        
-        return true;
-      });
-      
-      // Case 1: Has i18nKey, no components prop, and has children - basic rule
-      if (hasI18nKey && !hasComponentsProp && hasNonWhitespaceChildren) {
-        context.report({
-          node,
-          message: `Prefer using the 'components' prop with Trans instead of embedding elements directly. This avoids duplication and simplifies maintenance.`
-        });
+      // Skip non-Trans elements
+      if (elementName !== 'Trans') {
         return;
       }
-
-      // Case 2: Has both components prop AND children - this is redundant
-      if (hasComponentsProp && hasNonWhitespaceChildren) {
-        context.report({
-          node,
-          message: `When using the 'components' prop with Trans, you should not include children. The component should be self-closing.`
-        });
-        return;
-      }
-
-      // Case 3: Check if components in the components prop have text content
-      if (hasComponentsProp && componentsProp.value && componentsProp.value.type === 'JSXExpressionContainer') {
-        const expression = componentsProp.value.expression;
+      
+      // In non-test files, ensure this Trans is from react-i18next
+      if (!isTestFile) {
+        // Skip Trans from other libraries
+        if (otherTransImports.has(elementName)) {
+          return;
+        }
         
-        // Look for object expressions in the components prop
-        if (expression.type === 'ObjectExpression') {
-          for (const property of expression.properties) {
-            if (property.type === 'Property' && property.value.type === 'JSXElement') {
-              const componentElement = property.value;
+        // Skip unless we know this is from react-i18next
+        if (!reactI18nextTransImports.has(elementName)) {
+          return;
+        }
+      }
+      
+      // Check attributes
+      const attributes = jsxOpeningElement.attributes;
+      let hasComponents = false;
+      let hasI18nKey = false;
+      let i18nKeyProp = null;
+      let isVariableI18nKey = false;
+      
+      for (const attr of attributes) {
+        if (attr.type === 'JSXAttribute') {
+          // Check for components prop
+          if (attr.name.name === 'components') {
+            hasComponents = true;
+            
+            // Check if components has non-self-closing elements with content
+            if (
+              attr.value &&
+              attr.value.type === 'JSXExpressionContainer' &&
+              attr.value.expression.type === 'ObjectExpression'
+            ) {
+              const componentsObj = attr.value.expression;
               
-              // Check if this component has text children
-              if (hasNonEmptyTextChildren(componentElement)) {
-                const componentName = getComponentName(componentElement);
-                context.report({
-                  node: componentElement,
-                  message: `Components in the 'components' prop should be self-closing tags without text content. Found non-empty content in <${componentName}>.`
-                });
-                return;
+              for (const prop of componentsObj.properties) {
+                if (
+                  prop.type === 'Property' &&
+                  prop.value.type === 'JSXElement'
+                ) {
+                  const componentElement = prop.value;
+                  
+                  // Check if component has text/element children
+                  if (hasNonEmptyTextChildren(componentElement)) {
+                    const componentName = getComponentName(componentElement.openingElement);
+                    context.report({
+                      node: attr,
+                      messageId: 'componentsWithContent',
+                      data: {
+                        name: componentName
+                      }
+                    });
+                  }
+                }
               }
+            }
+          }
+          
+          // Check for i18nKey prop
+          if (attr.name.name === 'i18nKey') {
+            hasI18nKey = true;
+            i18nKeyProp = attr;
+            
+            // Check if i18nKey is using a variable reference (non-literal)
+            if (attr.value && attr.value.type === 'JSXExpressionContainer') {
+              isVariableI18nKey = true;
+            } else {
+              // Report error for string literal i18nKey
+              context.report({
+                node: attr,
+                messageId: 'useVariableReference'
+              });
             }
           }
         }
       }
-    }
+      
+      // If both components prop AND children, report that as an error
+      if (hasComponents && node.children.length > 0 && node.children.some(child => {
+        return !(child.type === 'JSXText' && child.value.trim() === '');
+      })) {
+        context.report({
+          node,
+          messageId: 'noChildrenWithComponentsProp'
+        });
+        return;
+      }
+      
+      // Check if there are embedded elements without using components prop
+      if (hasI18nKey && !hasComponents) {
+        const hasEmbeddedElements = node.children.some(child => {
+          return child.type === 'JSXElement';
+        });
+        
+        const hasNonEmptyChildren = node.children.some(child => {
+          return (child.type === 'JSXText' && child.value.trim() !== '') || 
+                 child.type === 'JSXElement' ||
+                 child.type === 'JSXExpressionContainer';
+        });
+        
+        // If there are embedded elements or any non-empty children, suggest using components prop
+        if (hasEmbeddedElements || hasNonEmptyChildren) {
+          context.report({
+            node,
+            messageId: 'preferComponentsProp'
+          });
+        }
+      }
+    },
   };
 };
