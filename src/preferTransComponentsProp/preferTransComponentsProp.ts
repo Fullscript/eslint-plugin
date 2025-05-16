@@ -1,4 +1,4 @@
-import { TSESLint, TSESTree, AST_NODE_TYPES } from '@typescript-eslint/utils';
+import { TSESLint, TSESTree } from '@typescript-eslint/utils';
 import { getComponentName, hasNonEmptyTextChildren } from '../utils/ast/astUtils';
 
 // Define message IDs for the rule
@@ -30,216 +30,163 @@ export const defaultOptions: [] = [];
 /**
  * Checks if a Trans component from react-i18next is using embedded elements instead of
  * the recommended 'components' prop pattern and ensures i18nKey is a variable reference.
- *
- * @example
- *
- * // Incorrect - Embeds elements directly in children, which duplicates text in code and translation files
- * // and makes maintenance harder as changes are needed in multiple places
- * <Trans i18nKey={l.credentials.Empty.Description}>
- *   Before you can order products, we
- *   <Link href={SUPPORT_LINK}>review your credentials</Link>
- *   to ensure all healthcare providers meet Fullscript's professional standards.
- * </Trans>
- *
- * // Also incorrect - Component in components prop has text content, which is redundant
- * // since text should only be in the translation file, not in both places
- * <Trans 
- *   i18nKey={l.credentials.Empty.Description}
- *   components={{
- *     link: <Link href="/support">Learn more</Link> // Should be self-closing
- *   }}
- * />
- *
- * // Also incorrect - Has both components prop AND children, creating redundancy
- * // and potential for inconsistency between the two sources of content
- * <Trans 
- *   i18nKey={l.credentials.Empty.Description}
- *   components={{
- *     link: <Link href="/support" />
- *   }}
- * >
- *   Some redundant text with <link>embedded link</link>
- * </Trans>
- * 
- * // Also incorrect - Uses string literals for i18nKey instead of variables
- * <Trans 
- *   i18nKey="paymentSettings:payoutsPausedVerification"
- *   components={{
- *     link: <Link href="/support" />
- *   }}
- * />
- *
- * // Also incorrect - Uses string literals for i18nKey
- * <Trans 
- *   i18nKey="namespace.key"
- * >
- *   Some text content
- * </Trans>
- * 
- * // Also incorrect - Has i18nKey and text content (text should come from translation only)
- * <Trans i18nKey={l.namespace.key}>
- *   Some text without components
- * </Trans>
- *
- * // Correct - Uses self-closing components in the components prop, no children, and a variable for i18nKey
- * <Trans
- *   i18nKey={l.credentials.Empty.Description}
- *   components={{
- *     credentialsLink: <Link href={SUPPORT_LINK} />
- *   }}
- * />
- * 
- * // Also correct - Uses variable for i18nKey with no children
- * <Trans i18nKey={l.namespace.key} />
  */
-export const create: TSESLint.RuleModule<MessageIds, []>['create'] = (context) => {
-  // For test files, we'll check all Trans components regardless of their import source
-  const isTestFile = context.getFilename().includes('.spec.') || 
-                     context.getFilename().includes('.test.');
-  
-  // For non-test files, track imports to apply rule only to Trans from react-i18next
-  const reactI18nextTransImports = new Set<string>();
-  const otherTransImports = new Set<string>();
-  
+export const create: TSESLint.RuleModule<MessageIds, []>['create'] = (context: TSESLint.RuleContext<MessageIds, []>) => {
   return {
-    // Track imports for non-test files
-    ImportDeclaration(node: TSESTree.ImportDeclaration) {
-      if (isTestFile) return; // Skip tracking for test files
-      
-      const specifiers = node.specifiers || [];
-      for (const specifier of specifiers) {
-        if (
-          specifier.type === 'ImportSpecifier' && 
-          specifier.imported && 
-          specifier.imported.type === 'Identifier' && 
-          specifier.imported.name === 'Trans' &&
-          specifier.local
-        ) {
-          if (node.source.value === 'react-i18next') {
-            reactI18nextTransImports.add(specifier.local.name);
-          } else {
-            otherTransImports.add(specifier.local.name);
-          }
-        }
-      }
-    },
-
-    // Check Trans component usage
     JSXElement(node: TSESTree.JSXElement) {
-      const jsxOpeningElement = node.openingElement;
-      const elementName = getComponentName(jsxOpeningElement);
+      if (
+        node.openingElement.name.type !== 'JSXIdentifier' ||
+        node.openingElement.name.name !== 'Trans'
+      ) {
+        return; // Not a Trans component, ignore
+      }
 
-      // Skip non-Trans elements
-      if (elementName !== 'Trans') {
+      // First, let's check if there's an import statement for Trans from another library
+      const sourceCode = context.getSourceCode();
+      const program = sourceCode.ast.body;
+      
+      // Check if there are any import statements that import Trans from a non-react-i18next source
+      const nonReactI18nextImport = program.some(statement => {
+        if (statement.type === 'ImportDeclaration' && 
+            statement.source.value !== 'react-i18next') {
+          return statement.specifiers.some(
+            specifier => specifier.type === 'ImportSpecifier' && 
+                        specifier.imported.name === 'Trans'
+          );
+        }
+        return false;
+      });
+      
+      // Skip this Trans component if it's explicitly imported from another library
+      if (nonReactI18nextImport) {
         return;
       }
-      
-      // In non-test files, ensure this Trans is from react-i18next
-      if (!isTestFile) {
-        // Skip Trans from other libraries
-        if (otherTransImports.has(elementName)) {
-          return;
-        }
-        
-        // Skip unless we know this is from react-i18next
-        if (!reactI18nextTransImports.has(elementName)) {
-          return;
-        }
-      }
-      
-      // Check attributes
-      const attributes = jsxOpeningElement.attributes;
-      let hasComponents = false;
-      let hasI18nKey = false;
+
+      // Find attributes and check children
       let i18nKeyProp = null;
-      let isVariableI18nKey = false;
-      
-      for (const attr of attributes) {
-        if (attr.type === 'JSXAttribute') {
-          // Check for components prop
-          if (attr.name.name === 'components') {
-            hasComponents = true;
+      let hasComponents = false;
+      let isStringLiteral = false;
+      let componentsWithContentProps = [];
+
+      // Check attributes
+      for (const attr of node.openingElement.attributes) {
+        if (attr.type !== 'JSXAttribute') continue;
+
+        // Track components prop
+        if (attr.name.name === 'components') {
+          hasComponents = true;
+
+          // Check for component elements with content inside components prop
+          if (
+            attr.value?.type === 'JSXExpressionContainer' &&
+            attr.value.expression.type === 'ObjectExpression'
+          ) {
+            const componentsObj = attr.value.expression;
             
-            // Check if components has non-self-closing elements with content
-            if (
-              attr.value &&
-              attr.value.type === 'JSXExpressionContainer' &&
-              attr.value.expression.type === 'ObjectExpression'
-            ) {
-              const componentsObj = attr.value.expression;
-              
-              for (const prop of componentsObj.properties) {
-                if (
-                  prop.type === 'Property' &&
-                  prop.value.type === 'JSXElement'
-                ) {
-                  const componentElement = prop.value;
+            for (const prop of componentsObj.properties) {
+              if (
+                prop.type === 'Property' &&
+                prop.value.type === 'JSXElement'
+              ) {
+                const componentElement = prop.value;
+                
+                if (hasNonEmptyTextChildren(componentElement)) {
+                  const componentName = getComponentName(componentElement.openingElement);
                   
-                  // Check if component has text/element children
-                  if (hasNonEmptyTextChildren(componentElement)) {
-                    const componentName = getComponentName(componentElement.openingElement);
-                    context.report({
-                      node: attr,
-                      messageId: 'componentsWithContent',
-                      data: {
-                        name: componentName
-                      }
-                    });
-                  }
+                  // Store for later reporting if needed
+                  componentsWithContentProps.push({
+                    prop: attr,
+                    name: componentName,
+                    element: componentElement
+                  });
                 }
               }
             }
           }
+        }
+        
+        // Track i18nKey prop
+        if (attr.name.name === 'i18nKey') {
+          i18nKeyProp = attr;
           
-          // Check for i18nKey prop
-          if (attr.name.name === 'i18nKey') {
-            hasI18nKey = true;
-            i18nKeyProp = attr;
-            
-            // Check if i18nKey is using a variable reference (non-literal)
-            if (attr.value && attr.value.type === 'JSXExpressionContainer') {
-              isVariableI18nKey = true;
-            } else {
-              // Report error for string literal i18nKey
-              context.report({
-                node: attr,
-                messageId: 'useVariableReference'
-              });
-            }
+          // Check for string literals in i18nKey - more comprehensive detection
+          if (attr.value?.type === 'Literal') { 
+            // Direct string literals: i18nKey="string"
+            isStringLiteral = true;
+          } else if (
+            attr.value?.type === 'JSXExpressionContainer' &&
+            attr.value.expression.type === 'Literal'
+          ) {
+            // String literals in expression containers: i18nKey={"string"}
+            isStringLiteral = true;
+          } else if (
+            attr.value && typeof attr.value === 'object' && 'value' in attr.value && 
+            typeof attr.value.value === 'string'
+          ) {
+            // Other possible string literal representations
+            isStringLiteral = true;
           }
         }
       }
+
+      // Check for non-empty children, properly handling JSX comments
+      const hasNonEmptyChildren = node.children.some(child => {
+        if (child.type === 'JSXText') {
+          // Empty text nodes don't count, e.g. whitespace between elements
+          return child.value.trim() !== '';
+        }
+        // Skip JSX comments in expression containers
+        if (child.type === 'JSXExpressionContainer' && 
+            child.expression.type === 'JSXEmptyExpression') {
+          return false;
+        }
+        // Check for actual elements or non-comment expressions
+        return child.type === 'JSXElement' || 
+               (child.type === 'JSXExpressionContainer' && 
+                child.expression.type !== 'JSXEmptyExpression');
+      });
+
+      // Report errors in priority order
       
-      // If both components prop AND children, report that as an error
-      if (hasComponents && node.children.length > 0 && node.children.some(child => {
-        return !(child.type === 'JSXText' && child.value.trim() === '');
-      })) {
+      // Priority 1: Check for components + children (both is redundant)
+      if (hasComponents && hasNonEmptyChildren) {
         context.report({
           node,
           messageId: 'noChildrenWithComponentsProp'
         });
-        return;
+        return; // Stop after reporting this error
       }
       
-      // Check if there are embedded elements without using components prop
-      if (hasI18nKey && !hasComponents) {
-        const hasEmbeddedElements = node.children.some(child => {
-          return child.type === 'JSXElement';
-        });
+      // Priority 2: Components with content
+      if (componentsWithContentProps.length > 0) {
+        const { prop, name, element } = componentsWithContentProps[0];
         
-        const hasNonEmptyChildren = node.children.some(child => {
-          return (child.type === 'JSXText' && child.value.trim() !== '') || 
-                 child.type === 'JSXElement' ||
-                 child.type === 'JSXExpressionContainer';
+        context.report({
+          node: prop,
+          messageId: 'componentsWithContent',
+          data: {
+            name: name // Use the component name directly without special casing
+          }
         });
-        
-        // If there are embedded elements or any non-empty children, suggest using components prop
-        if (hasEmbeddedElements || hasNonEmptyChildren) {
-          context.report({
-            node,
-            messageId: 'preferComponentsProp'
-          });
-        }
+        return; // Stop after reporting this error
+      }
+      
+      // Priority 3: i18nKey literal
+      if (isStringLiteral && i18nKeyProp) {
+        context.report({
+          node: i18nKeyProp,
+          messageId: 'useVariableReference'
+        });
+        return; // Stop after reporting this error
+      }
+      
+      // Priority 4: Check for i18nKey + embedded elements instead of components
+      if (i18nKeyProp && !hasComponents && hasNonEmptyChildren) {
+        context.report({
+          node,
+          messageId: 'preferComponentsProp'
+        });
+        return;
       }
     },
   };

@@ -52,16 +52,45 @@ const hasNonEmptyTextChildren = (element) => {
 /**
  * Gets the component name from a JSX element for use in error messages
  * @param element The JSX element to extract the name from
- * @returns The component name, or 'component' if name cannot be determined
+ * @returns The component name, or 'Unknown' if name cannot be determined
  */
 const getComponentName = (element) => {
-  const openingElement = element.openingElement;
+  const openingElement = element.openingElement || element;
+  
   if (openingElement && openingElement.name) {
-    if (openingElement.name.type === 'JSXIdentifier') {
-      return openingElement.name.name;
+    const { name } = openingElement;
+    
+    // Handle standard identifiers (e.g., <Link>)
+    if (name.type === 'JSXIdentifier') {
+      return name.name;
     }
+    
+    // Handle member expressions (e.g., <React.Fragment>)
+    if (name.type === 'JSXMemberExpression') {
+      // For member expressions, use the property part (e.g., "Fragment" from React.Fragment)
+      if (name.property && name.property.type === 'JSXIdentifier') {
+        return name.property.name;
+      }
+      // If we can't extract the property name, try the object name
+      // Example: <React.Fragment> should return 'Fragment'
+      if (name.object && name.object.type === 'JSXIdentifier') {
+        return name.object.name;
+      }
+    }
+    
+    // Handle namespaced names (e.g., <svg:path>) - returns 'path'
+    if (name.type === 'JSXNamespacedName') {
+      if (name.name && name.name.type === 'JSXIdentifier') {
+        return name.name.name;
+      }
+    }
+    
+    // Default case - return 'Unknown' if we couldn't determine the name
+    return 'Unknown';
   }
-  return 'component';
+  
+  // Default case - return 'Unknown' if we couldn't determine the name
+  return 'Unknown';
 };
 
 export {
