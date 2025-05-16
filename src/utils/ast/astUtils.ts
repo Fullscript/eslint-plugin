@@ -1,3 +1,5 @@
+import {TSESTree} from "@typescript-eslint/types";
+
 // types
 const isType = (node, type) => node?.type === type;
 const isCallExpression = node => isType(node, "CallExpression");
@@ -40,13 +42,8 @@ const findByPaths = (paths, tree) => {
  * @param element The JSX element to check
  * @returns true if the element has any non-whitespace text children
  */
-const hasNonEmptyTextChildren = (element) => {
-  return element.children.some(child => {
-    if (child.type === 'JSXText' && child.value.trim() !== '') {
-      return true;
-    }
-    return false;
-  });
+const hasNonEmptyTextChildren = (element: TSESTree.JSXElement) => {
+  return element.children.some(child => child.type === 'JSXText' && child.value.trim() !== '');
 };
 
 /**
