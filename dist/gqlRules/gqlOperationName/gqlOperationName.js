@@ -51,9 +51,10 @@ const meta = {
     ]
 };
 const create = (context)=>{
-    const isGqlObjectFile = (0, _utils.isGqlFile)(context);
     const { namespaceOperationPrefix , namespaceIgnoreList: initialNamespaceIgnoreList , sourcePath  } = context.options[0];
     const namespaceIgnoreList = initialNamespaceIgnoreList ?? [];
+    const isGraphQLFile = (0, _utils.isNativeGqlFile)(context);
+    const isTypescriptGqlFile = (0, _utils.isGqlFile)(context);
     const isGqlTemplateElement = (node)=>{
         return node.tag && node.tag.name === "gql";
     };
@@ -92,8 +93,9 @@ const create = (context)=>{
             });
         }
     };
+    // Handle TypeScript template literals with gql tag
     const TaggedTemplateExpression = (node)=>{
-        if (!isGqlObjectFile || !isGqlTemplateElement(node)) return;
+        if (!isTypescriptGqlFile || !isGqlTemplateElement(node)) return;
         const templateElementNode = node.quasi;
         const gqlOperationText = (0, _sanitizeGqlOperationText.sanitizeGqlOperationText)(templateElementNode, context);
         if ((0, _isGQLOperation.isQuery)(gqlOperationText)) {
@@ -102,7 +104,23 @@ const create = (context)=>{
             validateOperationName(gqlOperationText, "Mutation", templateElementNode);
         }
     };
+    // Handle GraphQL files directly
+    const OperationDefinition = (node)=>{
+        if (!isGraphQLFile) return;
+        // For GraphQL files, we need to extract the operation from the document
+        const sourceCode = context.getSourceCode();
+        const fileContent = sourceCode.getText();
+        // Find the operation type and name
+        const queryMatch = fileContent.match(/query\s+(\w+)/);
+        const mutationMatch = fileContent.match(/mutation\s+(\w+)/);
+        if (queryMatch) {
+            validateOperationName(queryMatch[0], "Query", node);
+        } else if (mutationMatch) {
+            validateOperationName(mutationMatch[0], "Mutation", node);
+        }
+    };
     return {
-        TaggedTemplateExpression
+        TaggedTemplateExpression,
+        OperationDefinition
     };
 };

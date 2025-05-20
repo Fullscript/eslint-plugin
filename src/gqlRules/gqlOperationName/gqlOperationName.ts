@@ -1,4 +1,4 @@
-import { isGqlFile } from "../utils";
+import { isGqlFile, isNativeGqlFile } from "../utils";
 import { isQuery, isMutation } from "../utils/isGQLOperation";
 import { relativePathToFile } from "../../utils";
 import { operationName } from "../utils/operationName";
@@ -37,7 +37,6 @@ const meta = {
 };
 
 const create = context => {
-  const isGqlObjectFile = isGqlFile(context);
   const {
     namespaceOperationPrefix,
     namespaceIgnoreList: initialNamespaceIgnoreList,
@@ -45,6 +44,8 @@ const create = context => {
   } = context.options[0];
 
   const namespaceIgnoreList = initialNamespaceIgnoreList ?? [];
+  const isGraphQLFile = isNativeGqlFile(context)
+  const isTypescriptGqlFile = isGqlFile(context);
 
   const isGqlTemplateElement = node => {
     return node.tag && node.tag.name === "gql";
@@ -54,9 +55,7 @@ const create = context => {
     const pathToFile = relativePathToFile(context);
     const relativeJsPath = pathToFile.replace(sourcePath, "");
 
-    const namespace = Object.keys(namespaceOperationPrefix).find(namespaceOperationKey =>
-      relativeJsPath.startsWith(namespaceOperationKey)
-    );
+    const namespace = Object.keys(namespaceOperationPrefix).find((namespaceOperationKey)=>relativeJsPath.startsWith(namespaceOperationKey));
 
     return { namespace, operationPrefix: namespaceOperationPrefix[namespace] };
   };
@@ -96,8 +95,9 @@ const create = context => {
     }
   };
 
+  // Handle TypeScript template literals with gql tag
   const TaggedTemplateExpression = node => {
-    if (!isGqlObjectFile || !isGqlTemplateElement(node)) return;
+    if (!isTypescriptGqlFile || !isGqlTemplateElement(node)) return;
 
     const templateElementNode = node.quasi;
     const gqlOperationText = sanitizeGqlOperationText(templateElementNode, context);
@@ -109,7 +109,27 @@ const create = context => {
     }
   };
 
-  return { TaggedTemplateExpression };
+  // Handle GraphQL files directly
+  const OperationDefinition = node => {
+    if (!isGraphQLFile) return;
+
+    const sourceCode = context.getSourceCode();
+    const fileContent = sourceCode.getText();
+
+  const queryMatch = fileContent.match(/query\s+(\w+)/);
+    const mutationMatch = fileContent.match(/mutation\s+(\w+)/);
+
+    if (queryMatch) {
+      validateOperationName(queryMatch[0], "Query", node);
+    } else if (mutationMatch) {
+      validateOperationName(mutationMatch[0], "Mutation", node);
+    }
+  };
+
+  return {
+    TaggedTemplateExpression,
+    OperationDefinition
+  };
 };
 
 export { meta, create };
