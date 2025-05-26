@@ -102,7 +102,10 @@ const meta = {
 
     // Report the violation
     context.report({
-      loc: { line: 1, column: 0 },
+      loc: {
+        start: { line: 1, column: 0 },
+        end: { line: 1, column: context.getSourceCode().lines[0]?.length || 0 }
+      },
       messageId: "noGraphqlTsxFiles",
       data: {
         operationType,

@@ -53,7 +53,7 @@ const meta = {
     }
 };
 const create = (context)=>{
-    var _context_options;
+    var _context_options, _context_getSourceCode_lines_;
     const fileName = context.getFilename();
     const match = fileName.match(/\.(query|mutation|fragment)\.tsx?$/);
     if (!match) {
@@ -102,8 +102,14 @@ const create = (context)=>{
     // Report the violation
     context.report({
         loc: {
-            line: 1,
-            column: 0
+            start: {
+                line: 1,
+                column: 0
+            },
+            end: {
+                line: 1,
+                column: ((_context_getSourceCode_lines_ = context.getSourceCode().lines[0]) === null || _context_getSourceCode_lines_ === void 0 ? void 0 : _context_getSourceCode_lines_.length) || 0
+            }
         },
         messageId: "noGraphqlTsxFiles",
         data: {
