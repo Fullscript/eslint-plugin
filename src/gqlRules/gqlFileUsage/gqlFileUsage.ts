@@ -3,8 +3,7 @@
  * @author Matthew Young
  */
 
-import { relativePathToFile } from "../../utils";
-import { execSync } from 'child_process';
+import { relativePathToFile, shouldFileBeLinted } from "../../utils";
 import path from 'path';
 
 const meta = {
@@ -25,17 +24,28 @@ const meta = {
               type: "string",
             },
           },
-          migrationStartDate: {
+          baseBranch: {
             type: "string",
-            description: "Date when migration started (YYYY-MM-DD). Files existing before this date will be exempted."
-          }
+            description: "Base branch to compare against (default: 'staging')",
+            default: "staging"
+          },
+          developmentMode: {
+            type: "boolean",
+            description: "Indicate rule is running in IDE developement, not CI or command line check",
+            default: undefined
+          },
+          fileTargetting: {
+            type: "string",
+            description: "Determine level of file targeting for incremental adoption (values: 'all', 'new', 'modified')",
+            default: 'all'
+          },
         },
         additionalProperties: false,
       },
     ],
     messages: {
       noGraphqlTsxFiles:
-        "Use \"{{ operationName }}.{{ operationType }}.gql\" file instead. The team is moving away from .tsx/.ts operation files.\nIf you encounter any issues with the .gql generated types, please notify #eng-hopper\nMore Info: https://docs.google.com/document/d/1s2qpdvmjevOUt7SgJA1RqWElk2S4XMrloVKEeYPvLfI",
+        "Use \"{{ operationName }}.{{ operationType }}.gql\" file instead. The team is moving away from .tsx/.ts operation files.\nIf you encounter any issues with the .gql generated types, please notify #eng-hopper\nMigration guide: https://docs.google.com/document/d/1s2qpdvmjevOUt7SgJA1RqWElk2S4XMrloVKEeYPvLfI",
     }
   };
 
@@ -49,7 +59,9 @@ const meta = {
 
     const options = context?.options?.[0] || {};
     const ignoreList = options?.namespaceIgnoreList ?? [];
-    const migrationStartDate = options?.migrationStartDate;
+    const baseBranch = options?.baseBranch || 'staging';
+    const fileTargetting = options?.fileTargetting ?? 'all'
+    const developmentMode = options?.developmentMode
 
     const isInIgnoreList = () => {
       if (!ignoreList?.length) return false;
@@ -61,42 +73,14 @@ const meta = {
       return {};
     }
 
-    // Check if file existed before migration start date
-    const isExistingFile = () => {
-      if (!migrationStartDate) {
-        return false; // If no migration date set, treat all files as new
-      }
-
-      try {
-        // Check if file existed before the migration start date
-        const result = execSync(
-          `git log --oneline --before="${migrationStartDate}" -- "${fileName}"`,
-          {
-            encoding: 'utf8',
-            stdio: 'pipe',
-            cwd: process.cwd()
-          }
-        );
-
-        const hasHistoryBeforeMigration = result.trim().length > 0;
-
-        return hasHistoryBeforeMigration;
-      } catch (error) {
-        // If git command fails, assume it's a new file
-        return false;
-      }
-    };
-
-    // If file existed before migration start, exempt it
-    if (isExistingFile()) {
+    // Check if this file should be linted based on git diff
+    if (fileTargetting !== 'all' && !shouldFileBeLinted(fileName, baseBranch, fileTargetting === 'new', developmentMode)) {
       return {};
     }
 
+
     // Extract the type (query, mutation, fragment) from the match
     const operationType = match[1];
-    const extension = fileName.endsWith("x") ? ".tsx" : ".ts";
-    const fileType = `.${operationType}${extension}`;
-
     const fileNameOnly = path.basename(fileName);
     const operationName = fileNameOnly.replace(/\.(query|mutation|fragment)\.tsx?$/, '');
 
@@ -110,7 +94,6 @@ const meta = {
       data: {
         operationType,
         operationName,
-        fileType,
       },
     });
 

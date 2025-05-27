@@ -16,7 +16,6 @@ _export(exports, {
     create: ()=>create
 });
 const _utils = require("../../utils");
-const _childProcess = require("child_process");
 const _path = /*#__PURE__*/ _interopRequireDefault(require("path"));
 function _interopRequireDefault(obj) {
     return obj && obj.__esModule ? obj : {
@@ -40,16 +39,27 @@ const meta = {
                         type: "string"
                     }
                 },
-                migrationStartDate: {
+                baseBranch: {
                     type: "string",
-                    description: "Date when migration started (YYYY-MM-DD). Files existing before this date will be exempted."
+                    description: "Base branch to compare against (default: 'staging')",
+                    default: "staging"
+                },
+                developmentMode: {
+                    type: "boolean",
+                    description: "Indicate rule is running in IDE developement, not CI or command line check",
+                    default: undefined
+                },
+                fileTargetting: {
+                    type: "string",
+                    description: "Determine level of file targeting for incremental adoption (values: 'all', 'new', 'modified')",
+                    default: 'all'
                 }
             },
             additionalProperties: false
         }
     ],
     messages: {
-        noGraphqlTsxFiles: "Use \"{{ operationName }}.{{ operationType }}.gql\" file instead. The team is moving away from .tsx/.ts operation files.\nIf you encounter any issues with the .gql generated types, please notify #eng-hopper\nMore Info: https://docs.google.com/document/d/1s2qpdvmjevOUt7SgJA1RqWElk2S4XMrloVKEeYPvLfI"
+        noGraphqlTsxFiles: "Use \"{{ operationName }}.{{ operationType }}.gql\" file instead. The team is moving away from .tsx/.ts operation files.\nIf you encounter any issues with the .gql generated types, please notify #eng-hopper\nMigration guide: https://docs.google.com/document/d/1s2qpdvmjevOUt7SgJA1RqWElk2S4XMrloVKEeYPvLfI"
     }
 };
 const create = (context)=>{
@@ -61,7 +71,9 @@ const create = (context)=>{
     }
     const options = (context === null || context === void 0 ? void 0 : (_context_options = context.options) === null || _context_options === void 0 ? void 0 : _context_options[0]) || {};
     const ignoreList = (options === null || options === void 0 ? void 0 : options.namespaceIgnoreList) ?? [];
-    const migrationStartDate = options === null || options === void 0 ? void 0 : options.migrationStartDate;
+    const baseBranch = (options === null || options === void 0 ? void 0 : options.baseBranch) || 'staging';
+    const fileTargetting = (options === null || options === void 0 ? void 0 : options.fileTargetting) ?? 'all';
+    const developmentMode = options === null || options === void 0 ? void 0 : options.developmentMode;
     const isInIgnoreList = ()=>{
         if (!(ignoreList === null || ignoreList === void 0 ? void 0 : ignoreList.length)) return false;
         const pathToFile = (0, _utils.relativePathToFile)(context);
@@ -70,33 +82,12 @@ const create = (context)=>{
     if (isInIgnoreList()) {
         return {};
     }
-    // Check if file existed before migration start date
-    const isExistingFile = ()=>{
-        if (!migrationStartDate) {
-            return false; // If no migration date set, treat all files as new
-        }
-        try {
-            // Check if file existed before the migration start date
-            const result = (0, _childProcess.execSync)(`git log --oneline --before="${migrationStartDate}" -- "${fileName}"`, {
-                encoding: 'utf8',
-                stdio: 'pipe',
-                cwd: process.cwd()
-            });
-            const hasHistoryBeforeMigration = result.trim().length > 0;
-            return hasHistoryBeforeMigration;
-        } catch (error) {
-            // If git command fails, assume it's a new file
-            return false;
-        }
-    };
-    // If file existed before migration start, exempt it
-    if (isExistingFile()) {
+    // Check if this file should be linted based on git diff
+    if (fileTargetting !== 'all' && !(0, _utils.shouldFileBeLinted)(fileName, baseBranch, fileTargetting === 'new', developmentMode)) {
         return {};
     }
     // Extract the type (query, mutation, fragment) from the match
     const operationType = match[1];
-    const extension = fileName.endsWith("x") ? ".tsx" : ".ts";
-    const fileType = `.${operationType}${extension}`;
     const fileNameOnly = _path.default.basename(fileName);
     const operationName = fileNameOnly.replace(/\.(query|mutation|fragment)\.tsx?$/, '');
     // Report the violation
@@ -114,8 +105,7 @@ const create = (context)=>{
         messageId: "noGraphqlTsxFiles",
         data: {
             operationType,
-            operationName,
-            fileType
+            operationName
         }
     });
     return {};
