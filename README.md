@@ -21,6 +21,8 @@ To write custom ESLint rules, you will need to:
    - Run `yarn link`. This will create a symlink to the local package that allows you to use your local version to debug a problem.
 3. In your hw-admin repo, run `yarn link @fullscript/eslint-plugin`. This will link the package to your current project and allows you to use the local version of the package you previously linked. To remove the linked package, run `yarn unlink @fullscript/eslint-plugin` and `yarn install –force`.
 
+**NOTE**: Since the yarn 4.0 upgrade, **sym-linking to hw-admin seems to be broken**. Temporarily remove `"packageManager": "yarn@4.9.1"` from `package.json` and re-build in order to get sym-linking working again for now.
+
 4. In the cloned ESLint-plugin repo, create a new rule as follows:
    - Create a new folder for the rule under `./src`.
    - Add a file that contains the new rule (e.g., `/oneTranslationImport.js`) and an index file that exports it (e.g., `/oneTranslationImport/index.js`).

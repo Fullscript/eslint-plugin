@@ -23,6 +23,7 @@ const rules = {
     "gql-objects": _gqlRules.gqlObjects,
     "gql-operation-name": _gqlRules.gqlOperationName,
     "gql-variable-name-match": _gqlRules.gqlVariableNameMatch,
+    "gql-file-usage": _gqlRules.gqlFileUsage,
     "cross-reference": _crossReference.crossReference,
     "circular-dependency": _circularDependency.circularDependency,
     "no-unawaited-skeletons": _noUnawaitedSkeletons.noUnawaitedSkeletons,

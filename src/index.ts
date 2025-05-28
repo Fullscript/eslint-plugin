@@ -5,6 +5,7 @@ import {
   gqlOperationName,
   gqlVariableNameMatch,
   gqlNoManualHookDeclaration,
+  gqlFileUsage,
 } from "./gqlRules";
 import { noRenamedTranslationImport } from "./noRenamedTranslationImport";
 import { noUnawaitedSkeletons } from "./noUnawaitedSkeletons";
@@ -21,6 +22,7 @@ const rules = {
   "gql-objects": gqlObjects,
   "gql-operation-name": gqlOperationName,
   "gql-variable-name-match": gqlVariableNameMatch,
+  "gql-file-usage": gqlFileUsage,
   "cross-reference": crossReference,
   "circular-dependency": circularDependency,
   "no-unawaited-skeletons": noUnawaitedSkeletons,

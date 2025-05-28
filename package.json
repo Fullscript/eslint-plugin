@@ -1,6 +1,6 @@
 {
   "name": "@fullscript/eslint-plugin",
-  "version": "3.1.0",
+  "version": "3.2.0",
   "description": "Fullscript custom eslint rules",
   "main": "dist/index.js",
   "contributors": [
@@ -10,7 +10,8 @@
     "Valentyn Patsera <valentyn.patsera@fullscript.com>",
     "Omar Nasr <omar.nasr@fullscript.com>",
     "Asuka Kuwahara <asuka.kuwahara@fullscript.com>",
-    "Benaiah Barango <benaiah.barango@fullscript.com>"
+    "Benaiah Barango <benaiah.barango@fullscript.com>",
+    "Matthew Young <matthew.young@fullscript.com>"
   ],
   "license": "MIT",
   "scripts": {
