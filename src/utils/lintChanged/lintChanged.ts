@@ -1,5 +1,5 @@
-import { execSync } from 'child_process';
-import path from 'path';
+import { execSync } from 'node:child_process';
+import path from 'node:path';
 
 // Cache for batch mode operations
 let batchCache: { files: Set<string>; baseBranch: string; newFilesOnly: boolean } | null = null;
@@ -95,7 +95,12 @@ const isDevelopmentMode = (): boolean => {
   return !process.env.CI && !process.env.TIMING;
 };
 
-export const shouldFileBeLinted = (fileName: string, baseBranch: string, newFilesOnly: boolean, developmentMode: boolean | undefined): boolean => {
+export const shouldFileBeLinted = (fileTargetting: 'all' | 'new' | 'modified', fileName: string, baseBranch: string, developmentMode: boolean | undefined): boolean => {
+  // If fileTargetting is set to all or not a recognized value, return true
+  if (fileTargetting === 'all' || (fileTargetting !== 'new' && fileTargetting !== 'modified')) return true;
+
+  const newFilesOnly = fileTargetting === 'new';
+
   if (developmentMode ?? isDevelopmentMode()) {
     return newFilesOnly ? isNewFile(fileName, baseBranch) : true;
   }

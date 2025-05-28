@@ -6,8 +6,8 @@ Object.defineProperty(exports, "shouldFileBeLinted", {
     enumerable: true,
     get: ()=>shouldFileBeLinted
 });
-const _childProcess = require("child_process");
-const _path = /*#__PURE__*/ _interopRequireDefault(require("path"));
+const _nodeChildProcess = require("node:child_process");
+const _nodePath = /*#__PURE__*/ _interopRequireDefault(require("node:path"));
 function _interopRequireDefault(obj) {
     return obj && obj.__esModule ? obj : {
         default: obj
@@ -46,14 +46,14 @@ let batchCache = null;
             ];
         }
         commands.forEach((cmd)=>{
-            const result = (0, _childProcess.execSync)(cmd, {
+            const result = (0, _nodeChildProcess.execSync)(cmd, {
                 encoding: 'utf8',
                 stdio: 'pipe',
                 cwd: process.cwd()
             }).trim();
             if (result) {
                 result.split('\n').forEach((file)=>{
-                    if (file) changedFiles.add(_path.default.resolve(file));
+                    if (file) changedFiles.add(_nodePath.default.resolve(file));
                 });
             }
         });
@@ -73,7 +73,7 @@ let batchCache = null;
  */ const isNewFile = (filePath, baseBranch)=>{
     try {
         // Untracked file OR file new to this branch OR staged new file
-        const result = (0, _childProcess.execSync)(`git ls-files --others --exclude-standard -- "${filePath}" 2>/dev/null || git diff --name-only --diff-filter=A ${baseBranch}...HEAD -- "${filePath}" 2>/dev/null || git diff --cached --name-only --diff-filter=A -- "${filePath}" 2>/dev/null`, {
+        const result = (0, _nodeChildProcess.execSync)(`git ls-files --others --exclude-standard -- "${filePath}" 2>/dev/null || git diff --name-only --diff-filter=A ${baseBranch}...HEAD -- "${filePath}" 2>/dev/null || git diff --cached --name-only --diff-filter=A -- "${filePath}" 2>/dev/null`, {
             encoding: 'utf8',
             stdio: 'pipe',
             cwd: process.cwd()
@@ -89,13 +89,16 @@ let batchCache = null;
  */ const isDevelopmentMode = ()=>{
     return !process.env.CI && !process.env.TIMING;
 };
-const shouldFileBeLinted = (fileName, baseBranch, newFilesOnly, developmentMode)=>{
+const shouldFileBeLinted = (fileTargetting, fileName, baseBranch, developmentMode)=>{
+    // If fileTargetting is set to all or not a recognized value, return true
+    if (fileTargetting === 'all' || fileTargetting !== 'new' && fileTargetting !== 'modified') return true;
+    const newFilesOnly = fileTargetting === 'new';
     if (developmentMode ?? isDevelopmentMode()) {
         return newFilesOnly ? isNewFile(fileName, baseBranch) : true;
     }
     // CI / Full suite run needs to batch git operations
     const changedFiles = getBatchChangedFiles(baseBranch, newFilesOnly);
-    const absoluteFileName = _path.default.resolve(fileName);
+    const absoluteFileName = _nodePath.default.resolve(fileName);
     // If no changed files found, don't lint anything
     // If changed files found, only lint files that are in the changed set
     return changedFiles.size > 0 && changedFiles.has(absoluteFileName);

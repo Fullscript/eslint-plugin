@@ -6,6 +6,8 @@
 import { relativePathToFile, shouldFileBeLinted } from "../../utils";
 import path from 'path';
 
+const NO_GRAPHQL_TSX_FILES_MSG = "noGraphqlTsxFiles"
+
 const meta = {
     type: "problem",
     docs: {
@@ -44,7 +46,7 @@ const meta = {
       },
     ],
     messages: {
-      noGraphqlTsxFiles:
+      [NO_GRAPHQL_TSX_FILES_MSG]:
         "Use \"{{ operationName }}.{{ operationType }}.gql\" file instead. The team is moving away from .tsx/.ts operation files.\nIf you encounter any issues with the .gql generated types, please notify #eng-hopper\nMigration guide: https://docs.google.com/document/d/1s2qpdvmjevOUt7SgJA1RqWElk2S4XMrloVKEeYPvLfI",
     }
   };
@@ -74,7 +76,7 @@ const meta = {
     }
 
     // Check if this file should be linted based on git diff
-    if (fileTargetting !== 'all' && !shouldFileBeLinted(fileName, baseBranch, fileTargetting === 'new', developmentMode)) {
+    if (!shouldFileBeLinted(fileTargetting, fileName, baseBranch, developmentMode)) {
       return {};
     }
 
@@ -90,7 +92,7 @@ const meta = {
         start: { line: 1, column: 0 },
         end: { line: 1, column: context.getSourceCode().lines[0]?.length || 0 }
       },
-      messageId: "noGraphqlTsxFiles",
+      messageId: NO_GRAPHQL_TSX_FILES_MSG,
       data: {
         operationType,
         operationName,
